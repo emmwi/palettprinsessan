@@ -1,35 +1,17 @@
 "use client";
-import Image from "next/image";
+import LogoImg from "./HeaderStyles";
+import Navbar from "./Navbar";
 
 export default function Header() {
   return (
     <>
       <header>
-        <div
-          style={{
-            position: "relative",
-            width: "20em",
-            height: "auto",
-            aspectRatio: "1/1",
-          }}
-        >
-          <Image
-            src="/palett2.jpg"
-            alt="logo, black cat with rainbowcolor on maine"
-            layout="fill"
-            objectFit="contain"
-          />
-        </div>
-        {/* <img
+        <LogoImg
           src="/palett2.jpg"
           alt="logo, black cat with rainbowcolor on maine"
-        /> */}
+        />
         <h1>Palettprinsessan</h1>
-        <ul>
-          <li>om</li>
-          <li>beställning</li>
-          <li>mönster</li>
-        </ul>
+        <Navbar />
       </header>
     </>
   );
