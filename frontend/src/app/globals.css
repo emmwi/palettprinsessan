@@ -1,0 +1,10 @@
+* {
+  margin: 0;
+  background-color: #faebd7;
+}
+
+main {
+  height: 60vh;
+  width: 60vw;
+  margin: 2rem auto;
+}
