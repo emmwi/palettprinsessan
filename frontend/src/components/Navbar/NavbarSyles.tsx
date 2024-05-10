@@ -2,7 +2,7 @@ import styled from "styled-components";
 import "@fontsource/italianno";
 
 interface NavUlistProps {
-  isOpen: boolean;
+  $isopen: boolean;
 }
 
 export const NavUlist = styled.ul<NavUlistProps>`
@@ -13,22 +13,23 @@ export const NavUlist = styled.ul<NavUlistProps>`
   background-color: #8ccbc1;
 
   /* background-image: linear-gradient(
-    to right bottom,
-    #d16ba5,
-    #c777b9,
-    #ba83ca,
-    #aa8fd8,
-    #9a9ae1,
-    #8aa7ec,
-    #79b3f4,
-    #69bff8,
-    #52cffe,
-    #41dfff,
-    #46eefa,
-    #5ffbf1
-  ); */
+      to right bottom,
+      #d16ba5,
+      #c777b9,
+      #ba83ca,
+      #aa8fd8,
+      #9a9ae1,
+      #8aa7ec,
+      #79b3f4,
+      #69bff8,
+      #52cffe,
+      #41dfff,
+      #46eefa,
+      #5ffbf1
+    ); */
   position: fixed;
-  transform: ${({ isOpen }) => (isOpen ? "translateX(0)" : "translateX(100%)")};
+  transform: ${({ $isopen }) =>
+    $isopen ? "translateX(0)" : "translateX(100%)"};
   top: 0;
   right: 0;
   height: 100vh;
@@ -74,11 +75,8 @@ export const NavList = styled.li`
     background-color: transparent;
   }
   @media screen and (min-width: 480px) {
-    padding: auto 2em;
-
     a {
       padding-left: 1em;
-      text-align: center;
     }
   }
 `;

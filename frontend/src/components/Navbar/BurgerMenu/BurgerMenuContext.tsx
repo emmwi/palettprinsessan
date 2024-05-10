@@ -2,7 +2,7 @@
 import { ReactNode, createContext, useContext, useState } from "react";
 
 interface BurgerContextProps {
-  isOpen: boolean;
+  isopen: boolean;
   toggle: () => void;
 }
 
@@ -29,10 +29,13 @@ export const BurgerMenuProvider: React.FC<BurgerMenuProviderProps> = ({
   const [isOpen, setIsOpen] = useState(false);
 
   function toggle() {
-    setIsOpen((isOpen) => !isOpen);
+    setIsOpen(!isOpen);
   }
   return (
-    <BurgerMenuContext.Provider value={{ isOpen, toggle }}>
+    <BurgerMenuContext.Provider
+      // value={{ isopen: isOpen.toString() === "true", toggle }}
+      value={{ isopen: isOpen, toggle }}
+    >
       {children}
     </BurgerMenuContext.Provider>
   );

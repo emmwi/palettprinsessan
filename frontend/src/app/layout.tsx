@@ -1,7 +1,7 @@
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 import Navbar from "../components/Navbar/Navbar";
-import { BurgerMenuProvider } from "../components/Navbar/BurgerMenuContext";
+import { BurgerMenuProvider } from "../components/Navbar/BurgerMenu/BurgerMenuContext";
 
 export const metadata = {
   title: "Next.js",

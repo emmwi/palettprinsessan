@@ -1,5 +1,6 @@
 import cors from "cors";
 import * as dotenv from "dotenv";
+
 import { Client } from "pg";
 import express from "express";
 
@@ -15,15 +16,14 @@ const app = express();
 
 app.use(cors());
 
-// app.get("/", async (_request, response) => {
-//   // Property 'queryy' does not exist on type 'Client'. Did you mean 'query'?
-//   const { rows } = await client.queryy("SELECT * FROM cities WHERE name = $1", [
-//     "Stockholm",
-//   ]);
+app.get("/", async (_request, response) => {
+  const { rows } = await client.query("SELECT * FROM cities WHERE name = $1", [
+    "Stockholm",
+  ]);
 
-//   response.send(rows);
-// });
+  response.send(rows);
+});
 
-app.listen(3000, () => {
-  console.log("Webbtjänsten kan nu ta emot anrop.");
+app.listen(8080, () => {
+  console.log("Webbtjänsten kan nu ta emot anrop.  http://localhost:8080/");
 });
