@@ -8,3 +8,27 @@ main {
   width: 60vw;
   margin: 2rem auto;
 }
+
+h1,
+h2,
+h3,
+h4,
+h5.h6 {
+  font-family: "Italianno", cursive;
+  color: #282222;
+}
+
+p {
+  font-family: "Jaldi";
+}
+
+footer {
+  background: rgb(166, 214, 213);
+  background: linear-gradient(
+    0deg,
+    rgba(166, 214, 213, 1) 0%,
+    rgba(166, 214, 213, 1) 54%,
+    rgba(250, 235, 215, 1) 68%
+  );
+  height: 15em;
+}

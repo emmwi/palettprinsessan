@@ -1,48 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { MenuImg, NavList } from "./NavbarSyles";
+import { Nav, NavList, NavUlist } from "./NavbarSyles";
+import Burger from "./Burger";
+import { useBurgerMenuContext } from "./BurgerMenuContext";
 
-import { useState } from "react";
 export default function Navbar() {
-  const [isClicked, setIsClicked] = useState(false);
-
-  function toggle() {
-    setIsClicked((isClicked) => !isClicked);
-  }
-  // https://sentry.io/answers/how-do-you-show-or-hide-elements-in-react/
+  const { isOpen } = useBurgerMenuContext();
+  //Tar emot värde för isOpen från usecontext
   return (
     <>
-      <ul>
-        <div onClick={toggle}>
-          <MenuImg
-            src="openMenu.svg"
-            alt="hamburgermenu closed, click to open"
-          />
-        </div>
-        {isClicked && (
-          <>
-            <div onClick={toggle}>
-              <MenuImg
-                src="closeMenu.svg"
-                alt="hamburgermenu closed, click to open"
-              />{" "}
-            </div>
-            <NavList>
-              <Link href="/">Home</Link>
-            </NavList>
-            <NavList>
-              <Link href="/about">About Us</Link>
-            </NavList>
-            <NavList>
-              <Link href="/order">Beställning</Link>
-            </NavList>
-            <NavList>
-              <Link href="/patterns">Mönster</Link>
-            </NavList>
-          </>
-        )}
-      </ul>
+      <Nav>
+        <Burger />
+        {/* skickar props till styled component för navbar och specifikt navbarul */}
+        <NavUlist isOpen={isOpen}>
+          <NavList>
+            <Link href="/">Start</Link>
+          </NavList>
+          <NavList>
+            <Link href="/about">Om</Link>
+          </NavList>
+          <NavList>
+            <Link href="/order">Beställning</Link>
+          </NavList>
+          <NavList>
+            <Link href="/patterns">Mönster</Link>
+          </NavList>
+        </NavUlist>
+      </Nav>
     </>
   );
 }
