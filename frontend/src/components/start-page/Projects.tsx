@@ -28,6 +28,7 @@ export default function about() {
   return (
     <>
       <ProjectContainer>
+        <h1>Tidigare Projekt</h1>
         {projects !== null &&
           projects.map(
             (project: {

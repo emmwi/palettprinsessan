@@ -1,7 +1,9 @@
+import AboutContent from "../../components/About-Page/About";
+
 export default function about() {
   return (
     <>
-      <h1>om palettprinsessan</h1>
+      <AboutContent />
     </>
   );
 }

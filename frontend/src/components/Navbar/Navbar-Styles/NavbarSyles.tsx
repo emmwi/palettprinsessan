@@ -8,7 +8,7 @@ interface NavUlistProps {
 export const CartContainer = styled.div`
   display: flex;
   justify-content: end;
-  margin: 0 1.3em 0 0;
+  padding-right: 1.3em;
 `;
 export const CartIcons = styled.img`
   width: 2em;
@@ -41,9 +41,9 @@ export const NavUlist = styled.ul<NavUlistProps>`
     $isopen ? "translateX(0)" : "translateX(100%)"};
   top: 0;
   right: 0;
+
   height: 100vh;
   padding-top: 5.5rem;
-  padding-right: 1em;
   transition: transform 0.3s ease-in-out;
 
   @media screen and (min-width: 990px) {
@@ -77,12 +77,13 @@ export const NavList = styled.li`
   color: black;
   font-size: 2rem;
   background-color: transparent;
-  padding: 19px 10px;
+  padding: 19px 0px;
 
   a {
     text-decoration: none;
     color: black;
     background-color: transparent;
+    padding-right: 0.5em;
   }
   @media screen and (min-width: 990px) {
     a {

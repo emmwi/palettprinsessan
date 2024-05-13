@@ -17,6 +17,10 @@ export const ProjectCard = styled.div`
 export const ProjectContainer = styled.div`
   margin: auto;
   text-align: center;
+
+  @media screen and (min-width: 990px) {
+    max-width: 50em;
+  }
 `;
 
 export const ProjectInfo = styled.p`

@@ -11,8 +11,11 @@ const app = express();
 
 app.use(cors());
 
-app.use(express.static(path.join(path.resolve(), "pictures")));
-app.use("/pictures", express.static(path.join(__dirname, "pictures")));
+// app.use(express.static(path.join(path.resolve(), "projects")));
+
+app.use("/projects", express.static(path.join(__dirname, "projects")));
+app.use("/patternsPDF", express.static(path.join(__dirname, "patternsPDF")));
+
 dotenv.config();
 
 const client = new Client({
@@ -21,13 +24,13 @@ const client = new Client({
 
 client.connect();
 
-app.get("/", async (_request, response) => {
-  const { rows } = await client.query("SELECT * FROM cities WHERE name = $1", [
-    "Stockholm",
-  ]);
+// app.get("/", async (_request, response) => {
+//   const { rows } = await client.query("SELECT * FROM cities WHERE name = $1", [
+//     "Stockholm",
+//   ]);
 
-  response.send(rows);
-});
+//   response.send(rows);
+// });
 
 app.get("/projects", async (_request, response) => {
   const { rows } = await client.query("SELECT * FROM projects ");
@@ -41,14 +44,34 @@ app.get("/projects", async (_request, response) => {
       project_id: project.project_id,
       name: project.name,
       description: project.description,
-      image: `/pictures/${project.image}`,
+      image: `/projects/${project.image}`,
     })
   );
   return response.send(projectData);
 });
+
+// app.get("/patterns", async (_request, response) => {
+//   const { rows } = await client.query("SELECT * FROM projects ");
+//   const projectData = rows.map(
+//     (project: {
+//       project_id: number;
+//       name: string;
+//       description: string;
+//       image: string;
+//     }) => ({
+//       project_id: project.project_id,
+//       name: project.name,
+//       description: project.description,
+//       image: `/projects/${project.image}`,
+//     })
+//   );
+//   return response.send(projectData);
+// });
 
 app.listen(8080, () => {
   console.log("Webbtjänsten kan nu ta emot anrop.  http://localhost:8080/");
 });
 
 // INSERT INTO projects (name, description, image) VALUES  ('baby blancet',  'stickat i baby alpacka, garn från adlibris', 'babyblanket.jpg');
+
+// INSERT INTO projects (name, description, image) VALUES  ('Patentstickat pannband med twist',  'stickat i Malabrigo Worsted', 'pannbandet.jpg');

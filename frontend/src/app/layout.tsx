@@ -22,7 +22,7 @@ export default function RootLayout({
           <Navbar />
           {/* <NavbarAdmin /> */}
         </BurgerMenuProvider>
-        {children}
+        <main>{children}</main>
         <Footer />
       </body>
     </html>

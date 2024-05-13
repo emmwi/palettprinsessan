@@ -13,7 +13,7 @@ import Burger from "../BurgerMenu/Burger";
 import { useBurgerMenuContext } from "../BurgerMenu/BurgerMenuContext";
 
 export default function NavbarClient() {
-  const { isopen } = useBurgerMenuContext();
+  const { isopen, toggle } = useBurgerMenuContext();
   //Tar emot värde för isOpen från usecontext
   return (
     <>
@@ -27,16 +27,24 @@ export default function NavbarClient() {
         {/* skickar props till styled component för navbar och specifikt navbarul */}
         <NavUlist $isopen={isopen}>
           <NavList>
-            <Link href="/">Projekt</Link>
+            <Link href="/" onClick={toggle}>
+              Projekt
+            </Link>
           </NavList>
           <NavList>
-            <Link href="/about">Om Palettprinsessan</Link>
+            <Link href="/about" onClick={toggle}>
+              Om Palettprinsessan
+            </Link>
           </NavList>
           <NavList>
-            <Link href="/order">Beställning</Link>
+            <Link href="/order" onClick={toggle}>
+              Beställning
+            </Link>
           </NavList>
           <NavList>
-            <Link href="/patterns">Mönster</Link>
+            <Link href="/patterns" onClick={toggle}>
+              Mönster
+            </Link>
           </NavList>
         </NavUlist>
       </Nav>

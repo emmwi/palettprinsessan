@@ -1,4 +1,4 @@
-import Projects from "../../../components/start-page/Projects";
+import Projects from "../../../components/Start-page/Projects";
 export default function viewProducts() {
   return (
     <>

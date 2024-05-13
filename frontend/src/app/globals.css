@@ -6,6 +6,7 @@
 main {
   width: 60vw;
   margin: 2rem auto;
+  min-height: 100vh; /*för att alltid få footern längst ner på vh*/
 }
 
 h1 {

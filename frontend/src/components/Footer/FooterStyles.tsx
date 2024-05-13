@@ -8,7 +8,6 @@ export const StyledFooter = styled.footer`
     rgba(166, 214, 213, 1) 54%,
     rgba(250, 235, 215, 1) 68%
   );
-  height: 10em;
 
   display: flex;
 
