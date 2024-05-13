@@ -7,7 +7,7 @@ interface BurgerMenuProps {
 export const BurgerMenu = styled.div<BurgerMenuProps>`
   width: 2rem;
   height: 2rem;
-  position: fixed;
+  position: absolute; //fixed om den ska följa med kolla om den kan döljas vid scroll down och synas vid scroll up
   top: 4em;
   right: 20px;
   display: flex;
@@ -37,7 +37,7 @@ export const BurgerMenu = styled.div<BurgerMenuProps>`
     }
   }
 
-  @media screen and (min-width: 480px) {
+  @media screen and (min-width: 990px) {
     display: none;
   }
 `;

@@ -1,6 +1,7 @@
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
-import Navbar from "../components/Navbar/Navbar";
+import Navbar from "../components/Navbar/NavBar";
+import "./globals.css"; // import NavbarAdmin from "../components/Navbar/navbar-admin/NavBarAdmin";
 import { BurgerMenuProvider } from "../components/Navbar/BurgerMenu/BurgerMenuContext";
 
 export const metadata = {
@@ -19,6 +20,7 @@ export default function RootLayout({
         <BurgerMenuProvider>
           <Header />
           <Navbar />
+          {/* <NavbarAdmin /> */}
         </BurgerMenuProvider>
         {children}
         <Footer />

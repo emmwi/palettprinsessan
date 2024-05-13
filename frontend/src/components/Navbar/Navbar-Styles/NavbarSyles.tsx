@@ -5,11 +5,20 @@ interface NavUlistProps {
   $isopen: boolean;
 }
 
+export const CartContainer = styled.div`
+  display: flex;
+  justify-content: end;
+  margin: 0 1.3em 0 0;
+`;
+export const CartIcons = styled.img`
+  width: 2em;
+  background: transparent;
+`;
+
 export const NavUlist = styled.ul<NavUlistProps>`
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
-  justify-content: space-evenly;
   background-color: #8ccbc1;
 
   /* background-image: linear-gradient(
@@ -33,17 +42,18 @@ export const NavUlist = styled.ul<NavUlistProps>`
   top: 0;
   right: 0;
   height: 100vh;
-  padding-top: 3.5rem;
+  padding-top: 5.5rem;
+  padding-right: 1em;
   transition: transform 0.3s ease-in-out;
 
-  @media screen and (min-width: 480px) {
+  @media screen and (min-width: 990px) {
     list-style: none;
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: space-evenly;
     background-color: transparent;
     position: relative;
-    padding: 0;
+    padding: 0 1em 0 0;
     transform: none;
     border: #85e7db;
   }
@@ -54,7 +64,7 @@ export const Nav = styled.nav`
   display: flex;
   justify-content: space-between;
 
-  @media screen and (min-width: 480px) {
+  @media screen and (min-width: 990px) {
     flex-direction: row-reverse;
 
     border-bottom: 2px solid #081a2133;
@@ -74,7 +84,7 @@ export const NavList = styled.li`
     color: black;
     background-color: transparent;
   }
-  @media screen and (min-width: 480px) {
+  @media screen and (min-width: 990px) {
     a {
       padding-left: 1em;
     }

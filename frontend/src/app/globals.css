@@ -4,22 +4,26 @@
 }
 
 main {
-  height: 60vh;
   width: 60vw;
   margin: 2rem auto;
 }
 
-h1,
+h1 {
+  font-family: "Italianno", cursive;
+  color: #282222;
+  text-align: center;
+  font-size: 2.5rem;
+}
+
+p,
 h2,
 h3,
 h4,
-h5.h6 {
-  font-family: "Italianno", cursive;
-  color: #282222;
-}
-
-p {
-  font-family: "Jaldi";
+h5,
+h6 {
+  /* font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; */
+  /* font-family: "Jaldi"; */
+  font-family: "Alegreya Sans";
 }
 
 footer {
