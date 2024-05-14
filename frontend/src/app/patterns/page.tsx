@@ -1,3 +1,4 @@
+import PatternContent from "../../components/Patterns-page/patterns";
 export default function pattern() {
-  return <h1>pattern</h1>;
+  return <PatternContent />;
 }

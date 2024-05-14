@@ -1,7 +1,8 @@
+import Projects from "../../../components/Start-page/Projects";
 export default function viewProject() {
   return (
     <>
-      <h1>visa projekt</h1>
+      <Projects />
     </>
   );
 }

@@ -1,7 +1,11 @@
-export default function admin() {
+import PatternContent from "../../components/Patterns-page/patterns";
+import OrderProduct from "../../components/order-product/OrderProduct";
+export default function ViewProducts() {
   return (
     <>
-      <h1>admin-sidan</h1>
+      <h1>Översikt Produkter</h1>
+      <PatternContent />;
+      <OrderProduct />
     </>
   );
 }

@@ -7,7 +7,7 @@ import Burger from "../BurgerMenu/Burger";
 import { useBurgerMenuContext } from "../BurgerMenu/BurgerMenuContext";
 
 export default function NavbarAdmin() {
-  const { isopen } = useBurgerMenuContext();
+  const { isopen, toggle } = useBurgerMenuContext();
   //Tar emot värde för isOpen från usecontext
   return (
     <>
@@ -17,19 +17,29 @@ export default function NavbarAdmin() {
 
         <NavUlist $isopen={isopen}>
           <NavList>
-            <Link href="/admin/vieworders">översikt beställningar</Link>
+            <Link href="/admin/addproducts" onClick={toggle}>
+              Lägg till Produkt
+            </Link>
           </NavList>
           <NavList>
-            <Link href="/admin/viewproducts">översikt produkter</Link>
+            <Link href="/admin/addprojects" onClick={toggle}>
+              Lägg till Projekt
+            </Link>
           </NavList>
           <NavList>
-            <Link href="/admin/addproducts">lägg till produkt</Link>
+            <Link href="/admin/vieworders" onClick={toggle}>
+              Översikt Beställningar
+            </Link>
           </NavList>
           <NavList>
-            <Link href="/admin/viewprojects">översikt projekt</Link>
+            <Link href="/admin" onClick={toggle}>
+              Översikt Produkter
+            </Link>
           </NavList>
           <NavList>
-            <Link href="/admin/addprojects">lägg till projekt</Link>
+            <Link href="/admin/viewprojects" onClick={toggle}>
+              Översikt Projekt
+            </Link>
           </NavList>
         </NavUlist>
       </Nav>

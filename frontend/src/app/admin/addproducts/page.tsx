@@ -1,8 +1,8 @@
-import Projects from "../../components/about-page/Projects";
+import AddPatternAndProduct from "../../../components/admin/Add-pattern-product/addPatternKnitwear";
 export default function addProduct() {
   return (
     <>
-      <h1>lägg till projekt</h1>
+      <AddPatternAndProduct />
     </>
   );
 }

@@ -66,7 +66,6 @@ export const Nav = styled.nav`
 
   @media screen and (min-width: 990px) {
     flex-direction: row-reverse;
-
     border-bottom: 2px solid #081a2133;
   }
 `;
@@ -75,7 +74,7 @@ export const NavList = styled.li`
   font-family: "Italianno", cursive;
   list-style-type: none;
   color: black;
-  font-size: 2rem;
+  font-size: 1.85rem;
   background-color: transparent;
   padding: 19px 0px;
 

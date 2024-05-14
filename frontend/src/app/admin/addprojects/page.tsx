@@ -1,8 +1,8 @@
-import Projects from "../../components/about-page/Projects";
+import AddProject from "../../../components/admin/Add-Project/AddProject";
 export default function addProject() {
   return (
     <>
-      <h1>lägg till projekt</h1>
+      <AddProject />
     </>
   );
 }

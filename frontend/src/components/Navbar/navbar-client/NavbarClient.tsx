@@ -37,13 +37,13 @@ export default function NavbarClient() {
             </Link>
           </NavList>
           <NavList>
-            <Link href="/order" onClick={toggle}>
-              Beställning
+            <Link href="/patterns" onClick={toggle}>
+              Mönster
             </Link>
           </NavList>
           <NavList>
-            <Link href="/patterns" onClick={toggle}>
-              Mönster
+            <Link href="/order" onClick={toggle}>
+              Beställning
             </Link>
           </NavList>
         </NavUlist>

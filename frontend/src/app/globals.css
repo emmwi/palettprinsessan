@@ -36,7 +36,4 @@ footer {
     rgba(250, 235, 215, 1) 68%
   );
   height: 15em;
-
-  @media screen and (min-width: 480px) {
-  }
 }
