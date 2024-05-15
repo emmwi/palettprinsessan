@@ -11,26 +11,26 @@ import {
 export default function AddProject() {
   return (
     <>
-      <h1>Lägg till Projekt</h1>
       <AdminContainer>
         <AdminCard>
           <h2>Lägg till projekt</h2>
-          <AdminForm>
+          <AdminForm
+            action="http://localhost:8080/project"
+            method="post"
+            encType="multipart/form-data"
+          >
             <label>Namn</label>
-            <TextInput type="input" />
-          </AdminForm>
-          <AdminForm>
+            <TextInput type="input" name="name" />
             <label>Bild:</label>
-            <UpploadButton
-              type="file"
-              accept="image/png, image/jpeg, image/jpg"
-            />
-          </AdminForm>
-          <AdminForm>
+            <UpploadButton type="file" accept="image/*" name="image" />
             <label>Beskrivning</label>
-            <DescriptionTextArea name="text" placeholder="Beskrivning..." />
+            <DescriptionTextArea
+              name="description"
+              placeholder="Beskrivning..."
+            />
+
+            <AddButton type="submit" value="Lägg till projekt " />
           </AdminForm>
-          <AddButton type="submit" value="Lägg till projekt " />
         </AdminCard>
       </AdminContainer>
     </>

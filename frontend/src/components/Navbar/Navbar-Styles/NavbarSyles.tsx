@@ -56,6 +56,7 @@ export const NavUlist = styled.ul<NavUlistProps>`
     padding: 0 1em 0 0;
     transform: none;
     border: #85e7db;
+    max-height: 5em;
   }
 `;
 export const Nav = styled.nav`
