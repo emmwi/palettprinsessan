@@ -26,6 +26,24 @@
 
  INSERT INTO knitwear(name, image, description, price) VALUES  ('BabyMössa, nyfödd- ca tre månader', 'babyhat_lemon.png', 'Mjuk baby-mössa stickat i handfärgat garn, baby Alpacka från Adlibris .', '250' );
 
+
+
  INSERT INTO projects (name, description, image) VALUES  ('baby blancet',  'stickat i baby alpacka, garn från adlibris', 'babyblanket.jpg');
 
 INSERT INTO projects (name, description, image) VALUES  ('Patentstickat pannband med twist',  'stickat i Malabrigo Worsted', 'pannbandet.jpg');
+
+
+CREATE TABLE admin (
+    id SERIAL PRIMARY KEY,
+    name TEXT UNIQUE NOT NULL,
+    password VARCHAR NOT NULL,
+    CHECK (LENGTH(password::TEXT) >= 6)
+); // VARCHAR tillåter både nummer och text
+
+INSERT INTO admin (name, password) VALUES ('emmaMWith', 'Q07xId027t');
+
+CREATE TABLE adminToken (
+    admin_id INTEGER,
+    token NUMERIC PRIMARY KEY,
+    FOREIGN KEY (admin_id) REFERENCES admin(id)
+);

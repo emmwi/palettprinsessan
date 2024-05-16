@@ -32,7 +32,7 @@ export default function NavbarAdmin() {
             </Link>
           </NavList>
           <NavList>
-            <Link href="/admin" onClick={toggle}>
+            <Link href="/admin/viewproducts" onClick={toggle}>
               Översikt Produkter
             </Link>
           </NavList>

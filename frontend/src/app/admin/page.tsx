@@ -1,11 +1,9 @@
-import PatternContent from "../../components/Patterns-page/patterns";
-import OrderProduct from "../../components/order-product/OrderProduct";
-export default function ViewProducts() {
+import LoginAdmin from "../../components/admin/Admin-Login/LogInAdmin";
+export default function StartPageAdmin() {
   return (
     <>
-      <h1>Översikt Produkter</h1>
-      <PatternContent />;
-      <OrderProduct />
+      <h1>Logga in</h1>
+      <LoginAdmin />
     </>
   );
 }

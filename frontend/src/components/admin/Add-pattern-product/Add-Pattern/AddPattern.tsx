@@ -18,6 +18,7 @@ export default function AddPattern() {
             action="http://localhost:8080/patterns"
             method="post"
             encType="multipart/form-data"
+            
           >
             <label>Namn</label>
             <TextInput type="input" name="name" />

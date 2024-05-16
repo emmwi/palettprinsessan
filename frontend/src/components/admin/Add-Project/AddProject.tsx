@@ -18,6 +18,9 @@ export default function AddProject() {
             action="http://localhost:8080/project"
             method="post"
             encType="multipart/form-data"
+            // onSubmit={(e) => {
+            //   e.preventDefault();
+            // }}
           >
             <label>Namn</label>
             <TextInput type="input" name="name" />

@@ -18,6 +18,7 @@ export default function AddPattern() {
             action="http://localhost:8080/knitwear"
             method="post"
             encType="multipart/form-data"
+            // onSubmit={(e) => {e.preventDefault(); e.prop}}
           >
             <label>Namn</label>
             <TextInput type="input" name="name" />
