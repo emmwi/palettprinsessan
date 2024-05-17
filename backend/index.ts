@@ -186,10 +186,10 @@ app.post(
 
 //post för att kunna göra ett inlogg och skapa ett token för admin --- det ska bara finnas en admin i denna applikationen
 app.post("/login", async (request, response) => {
-  const { name, password } = request.body;
+  const { adminName, password } = request.body;
 
   const { rows } = await client.query("SELECT * FROM admin  WHERE name = $1 ", [
-    name,
+    adminName,
   ]);
 
   //om user inte finns så sändes felmeddelanden
@@ -205,25 +205,27 @@ app.post("/login", async (request, response) => {
   const token = uuidv4();
   //lägger till ett nytt token varje gång användaren loggar in
   await client.query(
-    "INSERT INTO adminTokens (admin_id, token) VALUES ($1,$2) ?)",
+    "INSERT INTO admintoken (admin_id, token) VALUES ($1,$2) RETURNING *",
     [admin.id, token]
   );
+  response.status(200).send("inloggning lyckades  ");
 });
 
-// app.post("/logout/:token", async (request, response) => {
-//   try {
-//     const userToken = request.params.token;
+app.post("/logout/", async (request, response) => {
+  try {
+    const { rows } = await client.query("SELECT * FROM admintoken ");
+    const adminToken = rows[0];
 
-//     if (!userToken) {
-//       response.status(401).send("Unauthorized ");
-//     } else {
-//       await client.query("DELETE FROM adminTokens WHERE token = $1", [userToken]);
-//       response.status(200).send("utloggad ");
-//     }
-//   } catch (error) {
-//     return response.status(500).send("Internal Server Error");
-//   }
-// });
+    if (adminToken.length === 0) {
+      response.status(401).send("finns ingen användare inloggad");
+    } else {
+      await client.query("DELETE FROM admintoken");
+      response.status(200).send("utloggad, och alla tokens deletade ");
+    }
+  } catch (error) {
+    return response.status(500).send("Internal Server Error");
+  }
+});
 
 app.listen(8080, () => {
   console.log("Webbtjänsten kan nu ta emot anrop.  http://localhost:8080/");

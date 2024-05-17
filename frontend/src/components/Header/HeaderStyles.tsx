@@ -1,6 +1,4 @@
-import styled from "styled-components";
-// import "@fontsource/italianno";
-// https://www.npmjs.com/package/@fontsource/italianno
+import styled from "@emotion/styled";
 
 export const HeaderSyle = styled.header`
   /* background: linear-gradient(
@@ -18,7 +16,6 @@ export const HeaderSyle = styled.header`
   display: flex;
 `;
 export const LogoName = styled.h1`
-  /* font-family: "Italianno", cursive; */
   background-color: transparent;
   margin: auto 0.5em;
 `;

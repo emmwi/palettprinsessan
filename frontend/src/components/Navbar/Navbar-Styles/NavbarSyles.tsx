@@ -1,4 +1,5 @@
-import styled from "styled-components";
+// import styled from "styled-components";
+import styled from "@emotion/styled";
 import "@fontsource/italianno";
 
 interface NavUlistProps {
@@ -21,21 +22,6 @@ export const NavUlist = styled.ul<NavUlistProps>`
   flex-wrap: nowrap;
   background-color: #8ccbc1;
 
-  /* background-image: linear-gradient(
-      to right bottom,
-      #d16ba5,
-      #c777b9,
-      #ba83ca,
-      #aa8fd8,
-      #9a9ae1,
-      #8aa7ec,
-      #79b3f4,
-      #69bff8,
-      #52cffe,
-      #41dfff,
-      #46eefa,
-      #5ffbf1
-    ); */
   position: fixed;
   transform: ${({ $isopen }) =>
     $isopen ? "translateX(0)" : "translateX(100%)"};
@@ -90,4 +76,26 @@ export const NavList = styled.li`
       padding-left: 1em;
     }
   }
+`;
+
+export const LogOutButton = styled.input`
+  margin-left: 1em;
+  border-radius: 0.5em;
+  padding: 0.5em 1em;
+  color: #310ff0;
+  background-image: linear-gradient(
+    to right bottom,
+    #d16ba5,
+    #c777b9,
+    #ba83ca,
+    #aa8fd8,
+    #9a9ae1,
+    #8aa7ec,
+    #79b3f4,
+    #69bff8,
+    #52cffe,
+    #41dfff,
+    #46eefa,
+    #5ffbf1
+  );
 `;

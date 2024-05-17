@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled from "@emotion/styled";
 import "@fontsource/italianno";
 export const StyledFooter = styled.footer`
   background: rgb(166, 214, 213);

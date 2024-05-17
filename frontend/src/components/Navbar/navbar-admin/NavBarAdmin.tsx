@@ -1,14 +1,35 @@
 "use client";
 
 import Link from "next/link";
-import { Nav, NavList, NavUlist } from "../Navbar-Styles/NavbarSyles";
-
+import {
+  Nav,
+  NavList,
+  NavUlist,
+  LogOutButton,
+} from "../Navbar-Styles/NavbarSyles";
 import Burger from "../BurgerMenu/Burger";
 import { useBurgerMenuContext } from "../BurgerMenu/BurgerMenuContext";
+import axios from "axios";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function NavbarAdmin() {
-  const { isopen, toggle } = useBurgerMenuContext();
   //Tar emot värde för isOpen från usecontext
+  const { isopen, toggle } = useBurgerMenuContext();
+  const [errorMessage, setErrorMessage] = useState("");
+  const router = useRouter();
+
+  async function deleteToken() {
+    try {
+      const response = await axios.post("http://localhost:8080/logout");
+      if (response) {
+        router.push("/admin");
+        console.log("utloggad");
+      }
+    } catch (error) {
+      setErrorMessage("det gick inte att logga ut");
+    }
+  }
   return (
     <>
       <Nav>
@@ -43,6 +64,14 @@ export default function NavbarAdmin() {
           </NavList>
         </NavUlist>
       </Nav>
+      <LogOutButton
+        type="button"
+        value="logga ut"
+        onClick={() => {
+          deleteToken();
+        }}
+        {...(errorMessage && <p>{errorMessage}</p>)}
+      />
     </>
   );
 }

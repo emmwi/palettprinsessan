@@ -1,4 +1,3 @@
-"use client";
 import {
   TextInput,
   AddButton,
@@ -7,25 +6,23 @@ import {
   DescriptionTextArea,
   AdminForm,
   AdminContainer,
-} from "../../Admin-Syles/AdminStyles";
+} from "../Admin-Syles/AdminStyles";
 export default function AddPattern() {
   return (
     <>
       <AdminContainer>
         <AdminCard>
-          <h2>Lägg till Mönster</h2>
+          <h2>Lägg till Stickat Plagg</h2>
           <AdminForm
-            action="http://localhost:8080/patterns"
+            action="http://localhost:8080/knitwear"
             method="post"
             encType="multipart/form-data"
-            
+            // onSubmit={(e) => {e.preventDefault(); e.prop}}
           >
             <label>Namn</label>
             <TextInput type="input" name="name" />
             <label>Bild:</label>
             <UpploadButton type="file" accept="image/*" name="image" />
-            <label>Pdf:</label>
-            <UpploadButton type="file" accept="application/pdf" name="pdf" />
             <label>Beskrivning</label>
             <DescriptionTextArea
               name="description"

@@ -44,6 +44,6 @@ INSERT INTO admin (name, password) VALUES ('emmaMWith', 'Q07xId027t');
 
 CREATE TABLE adminToken (
     admin_id INTEGER,
-    token NUMERIC PRIMARY KEY,
+    token VARCHAR PRIMARY KEY,
     FOREIGN KEY (admin_id) REFERENCES admin(id)
 );
