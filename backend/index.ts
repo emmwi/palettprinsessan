@@ -197,7 +197,7 @@ app.post("/login", async (request, response) => {
     return response.status(400).send("ingen admin hittad");
   }
   const admin = rows[0];
-  //ger felmeddelande om lösenordet är fel
+
   if (admin.password !== password) {
     return response.status(401).send("401, Unauthorized");
   }
@@ -211,7 +211,7 @@ app.post("/login", async (request, response) => {
   response.status(200).send("inloggning lyckades  ");
 });
 
-app.post("/logout/", async (request, response) => {
+app.post("/logout/", async (_request, response) => {
   try {
     const { rows } = await client.query("SELECT * FROM admintoken ");
     const adminToken = rows[0];

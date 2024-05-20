@@ -4,7 +4,7 @@ export default function ViewProducts() {
   return (
     <>
       <h1>Översikt Produkter</h1>
-      <PatternContent />;
+      <PatternContent />
       <OrderProduct />
     </>
   );
