@@ -1,7 +1,7 @@
 import cors from "cors";
 import * as dotenv from "dotenv";
 import { Client } from "pg";
-import express from "express";
+import express, { response } from "express";
 import { request } from "http";
 import path from "path";
 import multer from "multer";
@@ -107,6 +107,23 @@ app.get("/patterns", async (_request, response) => {
   return response.send(patternData);
 });
 //lägga till nya mönster
+
+// type FieldType = FieldObject[] extends Express.Multer.File;
+
+interface Fields {
+  image: FieldObject[];
+  pdf: FieldObject[];
+}
+interface FieldObject {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  destination: string;
+  filename: string;
+  path: string;
+  size: number;
+}
 app.post(
   "/patterns",
   uploadPattern.fields([{ name: "image" }, { name: "pdf" }]),
@@ -119,19 +136,32 @@ app.post(
 
       console.log(request.files);
       if (request.files !== undefined) {
-        console.log(request.files.image[0].filename);
-        console.log(request.files.pdf[0].filename);
-        response.status(201).send("projekt uppladdat");
+        // console.log((request.files as unknown as Fields).image[0].filename);
+        // console.log(request.files.pdf[0].filename);
+        //lägga in samma sak i items-tabellen också så att de kan nås i cart
+        await client.query(
+          "INSERT INTO items (name, image, pdf, description, price, type) VALUES ($1, $2, $3, $4, $5, $6)",
+          [
+            name,
+            (request.files as unknown as Fields).image[0].filename,
+            (request.files as unknown as Fields).pdf[0].filename,
+            description,
+            price,
+            "pattern",
+          ]
+        );
+
         await client.query(
           "INSERT INTO patterns (name, image, pdf, description, price) VALUES ($1, $2, $3, $4,$5) RETURNING *",
           [
             name,
-            request.files.image[0].filename,
-            request.files.pdf[0].filename,
+            (request.files as unknown as Fields).image[0].filename,
+            (request.files as unknown as Fields).pdf[0].filename,
             description,
             price,
           ]
         );
+        response.status(201).send("projekt uppladdat");
       }
       response.status(200).send();
     } catch (error) {
@@ -170,12 +200,16 @@ app.post(
       const description = request.body.description;
       const price = request.body.price;
       if (request.file !== undefined) {
-        console.log(request.file);
-        response.status(201).send("projekt uppladdat");
+        //lägga in samma sak i items-tabellen också så att de kan nås i cart
+        await client.query(
+          "INSERT INTO items (name, image, price, description, type) VALUES ($1, $2, $3, $4, $5)",
+          [name, request.file.filename, price, description, "knitwear"]
+        );
         await client.query(
           "INSERT INTO knitwear (name, image, price, description) VALUES ($1, $2, $3, $4) RETURNING *",
           [name, request.file.filename, price, description]
         );
+        response.status(201).send("projekt uppladdat");
       }
     } catch (error) {
       console.error(error);
@@ -227,33 +261,70 @@ app.post("/logout/", async (_request, response) => {
   }
 });
 
+app.get("/getItems", async (request, response) => {
+  try {
+    const { rows } = await client.query("SELECT * FROM items");
+
+    const itemData = rows.map(
+      (items: {
+        item_id: number;
+        name: string;
+        description: string;
+        image: string;
+        price: Number;
+        type: string;
+      }) => ({
+        item_id: items.item_id,
+        name: items.name,
+        description: items.description,
+        image:
+          items.type === "knitwear"
+            ? `/uploads/knitwear/${items.image}`
+            : `/uploads/patterns/${items.image}`,
+        price: items.price,
+        type: items.type,
+      })
+    );
+    response.status(200).send(itemData);
+  } catch (error) {
+    console.log(error, "gick inte att hämta items");
+  }
+});
+
+app.post("/createSessionAndCart", async (request, response) => {
+  const sessionId = request.body;
+  await client.query(
+    "INSERT INTO carts (session_id) VALUES ($1,) RETURNING *",
+    [sessionId]
+  );
+  response.status(201).send("ny session skapad");
+});
+
+app.post("/addToCart", async (request, response) => {
+  const { id, cart_id, item_id, name, price, quantity } = request.body;
+
+  try {
+    const result = await client.query(
+      "INSERT INTO cart_items (cart_item_id, cart_id, item_id, name, quantity, price) VALUES ($1, $2, $3) RETURNING *",
+      [id, cart_id, item_id, name, price, quantity]
+    );
+
+    response.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error("Error adding item to cart:", error);
+    response.status(500).send("Internal Server Error");
+  }
+});
+app.get("/shoppingCart", async (request, response) => {
+  const { rows } = await client.query("SELECT * FROM carts ");
+
+  return response.status(200).send(rows);
+});
+
+app.put("/updateShoppingCart", async (request, response) => {
+  const cartItems = request.body;
+});
+
 app.listen(8080, () => {
   console.log("Webbtjänsten kan nu ta emot anrop.  http://localhost:8080/");
 });
-
-// [Object: null prototype] {
-//   [0]   image: [
-//   [0]     {
-//   [0]       fieldname: 'image',
-//   [0]       originalname: 'fÃ¤rger.png',
-//   [0]       encoding: '7bit',
-//   [0]       mimetype: 'image/png',
-//   [0]       destination: 'C:\\Users\\emmam\\OneDrive\\Mappar\\programmering\\IT_Högskolan2023\\fullstack\\Labb3\\rollback\\palettprinsessan\\backend\\uploads\\patternsPDF',
-//   [0]       filename: 'e4822d0586b8c950d6406156afb2233a',
-//   [0]       path: 'C:\\Users\\emmam\\OneDrive\\Mappar\\programmering\\IT_Högskolan2023\\fullstack\\Labb3\\rollback\\palettprinsessan\\backend\\uploads\\patternsPDF\\e4822d0586b8c950d6406156afb2233a',
-//   [0]       size: 44592
-//   [0]     }
-//   [0]   ],
-//   [0]   pdf: [
-//   [0]     {
-//   [0]       fieldname: 'pdf',
-//   [0]       originalname: 'hol(e)y.pdf',
-//   [0]       encoding: '7bit',
-//   [0]       mimetype: 'application/pdf',
-//   [0]       destination: 'C:\\Users\\emmam\\OneDrive\\Mappar\\programmering\\IT_Högskolan2023\\fullstack\\Labb3\\rollback\\palettprinsessan\\backend\\uploads\\patternsPDF',
-//   [0]       filename: 'e4a05834089ec3521a9fffc5ece6979d',
-//   [0]       path: 'C:\\Users\\emmam\\OneDrive\\Mappar\\programmering\\IT_Högskolan2023\\fullstack\\Labb3\\rollback\\palettprinsessan\\backend\\uploads\\patternsPDF\\e4a05834089ec3521a9fffc5ece6979d',
-//   [0]       size: 170313
-//   [0]     }
-//   [0]   ]
-//   [0] }

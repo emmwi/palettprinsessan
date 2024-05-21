@@ -47,3 +47,35 @@ CREATE TABLE adminToken (
     token VARCHAR PRIMARY KEY,
     FOREIGN KEY (admin_id) REFERENCES admin(id)
 );
+
+
+
+- Skapa tabellen för varukorgen
+  CREATE TABLE carts (
+      cart_id SERIAL PRIMARY KEY,
+      session_id VARCHAR,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+
+-- Skapa tabellen för alla objekt (knitwear och patterns)
+ -- Type =Typen av objekt: knitwear eller patterns
+  -- För patterns
+CREATE TABLE items (
+  item_id SERIAL PRIMARY KEY,
+  name TEXT UNIQUE NOT NULL,
+  image TEXT NOT NULL,
+  description TEXT NOT NULL,
+  pdf TEXT,
+  price NUMERIC NOT NULL,
+  type TEXT NOT NULL
+);
+
+
+CREATE TABLE cart_items (
+  cart_item_id SERIAL PRIMARY KEY,
+  cart_id INT NOT NULL,
+  item_id INT NOT NULL,
+  quantity INT NOT NULL DEFAULT 1,
+  FOREIGN KEY (cart_id) REFERENCES carts(cart_id),
+  FOREIGN KEY (item_id) REFERENCES items(item_id)
+);

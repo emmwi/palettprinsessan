@@ -1,8 +1,9 @@
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
-import Navbar from "../components/Navbar/NavBar";
+import Navbar from "../components/Navbar/Navbar";
 import "./globals.css"; // import NavbarAdmin from "../components/Navbar/navbar-admin/NavBarAdmin";
 import { BurgerMenuProvider } from "../components/Navbar/BurgerMenu/BurgerMenuContext";
+import { CartProvider } from "../components/shopping-cart/CartContext";
 
 export const metadata = {
   title: "Next.js",
@@ -17,13 +18,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <BurgerMenuProvider>
-          <Header />
-          <Navbar />
-          {/* <NavbarAdmin /> */}
-        </BurgerMenuProvider>
-        <main>{children}</main>
-        <Footer />
+        <CartProvider>
+          <BurgerMenuProvider>
+            <Header />
+            <Navbar />
+            {/* <NavbarAdmin /> */}
+          </BurgerMenuProvider>
+          <main>{children}</main>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );
