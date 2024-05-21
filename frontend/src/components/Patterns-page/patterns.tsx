@@ -12,59 +12,39 @@ import {
 } from "../general-css/GeneralStyles";
 
 export default function PatternContent() {
-  type patterns = {
-    pattern_id: number;
-    name: string;
-    description: string;
-    image: string;
-    pdf: string;
-    price: number;
-  };
-
   const { cartItems, addToCart, doesCartExists } = useCartContext();
   console.log("cartcontext hittas");
 
-  const [patterns, setPatterns] = useState<patterns[]>([]);
   const [items, setItem] = useState([]);
 
+  async function fetchItems() {
+    try {
+      const response = await axios.get("http://localhost:8080/getItems", {});
+      if (response.data) {
+        console.log(response.data, "vad får jag");
+        const filteredItems = response.data.filter(
+          (fItem: { type: any }) => fItem.type === "pattern"
+        );
+
+        setItem(filteredItems);
+      }
+    } catch (error) {
+      console.log("fel vid hämtning av patterns", error);
+    }
+  }
   useEffect(() => {
-    fetch("http://localhost:8080/patterns")
-      .then((response) => response.json())
-      .then((result) => {
-        setPatterns(result);
-      });
+    fetchItems();
   }, []);
 
-  // async function fetchItems() {
-  //   try {
-  //     const response = await axios.get("http://localhost:8080/getItems", {});
-  //     if (response.data) {
-  //       setItem(response.data);
-  //     }
-  //   } catch (error) {
-  //     console.log("fel vid hämtning av items", error);
-  //   }
-  // }
-  // useEffect(() => {
-  //   fetchItems();
-  // }, []);
-
   const handleClick = (clickedItem: {
-    pattern_id: Key | undefined | null;
+    item_id: Key | undefined | null;
     name: string;
     description: string;
     image: string;
     price: number;
   }) => {
-    // addToCart({
-    //   id: clickedItem.item_id as number,
-    //   image: clickedItem.image,
-    //   name: clickedItem.name,
-    //   price: clickedItem.price,
-    //   quantity: 1,
-    // });
     addToCart({
-      id: clickedItem.pattern_id as number,
+      id: clickedItem.item_id as number,
       image: clickedItem.image,
       name: clickedItem.name,
       price: clickedItem.price,
@@ -76,7 +56,7 @@ export default function PatternContent() {
   return (
     <>
       <Container>
-        {/* <h1>Mönster</h1>
+        <h1>Mönster</h1>
         {items !== null &&
           items.map(
             (item: {
@@ -87,7 +67,7 @@ export default function PatternContent() {
               price: number;
             }) => (
               <Card key={item.item_id}>
-                <h2>{ListItem.name}</h2>
+                <h2>{item.name}</h2>
                 <Img
                   src={`http://localhost:8080${item.image}`}
                   alt="bild på projektet"
@@ -99,33 +79,6 @@ export default function PatternContent() {
                   type="button"
                   value="Handla"
                   onClick={() => handleClick(item)}
-                />
-              </Card>
-            )
-          )} */}
-        <h1>Mönster</h1>
-        {patterns !== null &&
-          patterns.map(
-            (pattern: {
-              pattern_id: Key | undefined | null;
-              name: string;
-              description: string;
-              image: string;
-              price: number;
-            }) => (
-              <Card key={pattern.pattern_id}>
-                <h2>{pattern.name}</h2>
-                <Img
-                  src={`http://localhost:8080${pattern.image}`}
-                  alt="bild på projektet"
-                />
-                <Info>{pattern.description},</Info>
-                <Price>{pattern.price} kr</Price>
-
-                <OderButton
-                  type="button"
-                  value="Handla"
-                  onClick={() => handleClick(pattern)}
                 />
               </Card>
             )

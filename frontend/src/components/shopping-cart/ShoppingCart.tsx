@@ -24,7 +24,21 @@ export default function ShoppingCart() {
             <Img src={`http://localhost:8080${item.image}`} alt={item.name} />
 
             <p>{item.price} kr</p>
-
+            <button
+              onClick={() => {
+                addToCart(item);
+              }}
+            >
+              +
+            </button>
+            <p>{item.quantity}</p>
+            <button
+              onClick={() => {
+                removeFromCart(item);
+              }}
+            >
+              -
+            </button>
             {/* <button
               onClick={() => {
                 clearCart();

@@ -1,6 +1,7 @@
 "use client";
 import { Key, useEffect, useState } from "react";
-import Link from "next/link";
+import { useCartContext } from "../shopping-cart/CartContext";
+import axios from "axios";
 import {
   Card,
   Img,
@@ -11,45 +12,74 @@ import {
 } from "../general-css/GeneralStyles";
 
 export default function OrderProduct() {
-  type knitwears = {
-    knitwear_id: number;
+  const { cartItems, addToCart, doesCartExists } = useCartContext();
+  console.log("cartcontext hittas");
+  const [items, setItem] = useState([]);
+
+  async function fetchItems() {
+    try {
+      const response = await axios.get("http://localhost:8080/getItems", {});
+      if (response.data) {
+        console.log(response.data, "vad får jag");
+        const filteredItems = response.data.filter(
+          (fItem: { type: any }) => fItem.type === "knitwear"
+        );
+
+        setItem(filteredItems);
+      }
+    } catch (error) {
+      console.log("fel vid hämtning av patterns", error);
+    }
+  }
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  const handleClick = (clickedItem: {
+    item_id: Key | undefined | null;
     name: string;
     description: string;
     image: string;
     price: number;
-  };
-  const [knitwears, setKnitwears] = useState<knitwears[]>([]);
+  }) => {
+    addToCart({
+      id: clickedItem.item_id as number,
+      image: clickedItem.image,
+      name: clickedItem.name,
+      price: clickedItem.price,
+      quantity: 1,
+    });
 
-  useEffect(() => {
-    fetch("http://localhost:8080/knitwears")
-      .then((response) => response.json())
-      .then((result) => {
-        setKnitwears(result);
-      });
-  }, []);
+    doesCartExists();
+  };
 
   return (
     <>
       <Container>
         <h1>Stickade plagg</h1>
-        {knitwears !== null &&
-          knitwears.map(
-            (knitwear: {
-              knitwear_id: Key | undefined | null;
+        {items !== null &&
+          items.map(
+            (item: {
+              item_id: Key | undefined | null;
               name: string;
               description: string;
               image: string;
               price: number;
             }) => (
-              <Card key={knitwear.knitwear_id}>
-                <h2>{knitwear.name}</h2>
+              <Card key={item.item_id}>
+                <h2>{item.name}</h2>
                 <Img
-                  src={`http://localhost:8080${knitwear.image}`}
-                  alt="bild på stickat plagg"
+                  src={`http://localhost:8080${item.image}`}
+                  alt="bild på projektet"
                 />
-                <Info>{knitwear.description}</Info>
-                <Price>{knitwear.price} kr </Price>
-                <OderButton type="button" value="Handla" />
+                <Info>{item.description},</Info>
+                <Price>{item.price} kr</Price>
+
+                <OderButton
+                  type="button"
+                  value="Handla"
+                  onClick={() => handleClick(item)}
+                />
               </Card>
             )
           )}

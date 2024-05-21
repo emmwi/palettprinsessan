@@ -106,10 +106,8 @@ app.get("/patterns", async (_request, response) => {
   );
   return response.send(patternData);
 });
+
 //lägga till nya mönster
-
-// type FieldType = FieldObject[] extends Express.Multer.File;
-
 interface Fields {
   image: FieldObject[];
   pdf: FieldObject[];
@@ -170,6 +168,7 @@ app.post(
     }
   }
 );
+
 //hömta produketer/stickade plagg
 app.get("/knitwears", async (_request, response) => {
   const { rows } = await client.query("SELECT * FROM knitwear ");
@@ -261,6 +260,7 @@ app.post("/logout/", async (_request, response) => {
   }
 });
 
+//hämtar alla items som finns att köpa
 app.get("/getItems", async (request, response) => {
   try {
     const { rows } = await client.query("SELECT * FROM items");
@@ -280,7 +280,7 @@ app.get("/getItems", async (request, response) => {
         image:
           items.type === "knitwear"
             ? `/uploads/knitwear/${items.image}`
-            : `/uploads/patterns/${items.image}`,
+            : `/uploads/patternsPDF/${items.image}`,
         price: items.price,
         type: items.type,
       })
@@ -291,38 +291,106 @@ app.get("/getItems", async (request, response) => {
   }
 });
 
+//lägger till ett sessionID i cart
 app.post("/createSessionAndCart", async (request, response) => {
-  const sessionId = request.body;
-  await client.query(
-    "INSERT INTO carts (session_id) VALUES ($1,) RETURNING *",
-    [sessionId]
-  );
+  const { sessionId } = request.body;
+  console.log(sessionId);
+  await client.query("INSERT INTO carts (session_id) VALUES ($1) RETURNING *", [
+    sessionId,
+  ]);
   response.status(201).send("ny session skapad");
 });
 
+//lägga in saker i cart
 app.post("/addToCart", async (request, response) => {
-  const { id, cart_id, item_id, name, price, quantity } = request.body;
-
+  const { sessionId, id, quantity } = request.body;
+  console.log(request.body);
+  console.log(sessionId);
   try {
-    const result = await client.query(
-      "INSERT INTO cart_items (cart_item_id, cart_id, item_id, name, quantity, price) VALUES ($1, $2, $3) RETURNING *",
-      [id, cart_id, item_id, name, price, quantity]
+    const { rows } = await client.query(
+      "select * from carts where session_id = $1",
+      [sessionId]
     );
+    console.log(rows);
+    if (rows.length !== 0) {
+      const cart_id = rows[0].cart_id;
+      console.log(cart_id);
+      const result = await client.query(
+        "INSERT INTO cart_items ( cart_id, item_id, quantity) VALUES ($1, $2, $3) RETURNING *",
+        [cart_id, id, quantity]
+      );
 
-    response.status(201).json(result.rows[0]);
+      response.status(201).json(result.rows[0]);
+    }
   } catch (error) {
     console.error("Error adding item to cart:", error);
     response.status(500).send("Internal Server Error");
   }
 });
+// //deleta om man tar bort saker från cart
+app.post("/deleteItemFromCart", async (request, response) => {
+  const { item_id, sessionId } = request.body;
+
+  if (!item_id || !sessionId) {
+    return response.status(400).send("item_id och sessionId krävs");
+  }
+
+  try {
+    // Kontrollera om det finns några artiklar i kundvagnen för den givna sessionId
+    const { rows } = await client.query(
+      "SELECT * FROM cart_items WHERE session_id = $1",
+      [sessionId]
+    );
+
+    if (rows.length === 0) {
+      return response
+        .status(404)
+        .send("Kundvagnen är tom eller sessionId finns inte");
+    }
+
+    // Kontrollera om artikeln med det specifika item_id finns i kundvagnen
+    const itemExists = rows.filter((items) => items.item_id === item_id);
+
+    if (itemExists.length === 0) {
+      return response.status(404).send("Artikeln finns inte i kundvagnen");
+    }
+
+    // Ta bort artikeln med det specifika item_id från kundvagnen
+    await client.query(
+      "DELETE FROM cart_items WHERE item_id = $1 AND session_id = $2",
+      [item_id, sessionId]
+    );
+
+    response.status(200).send("Artikeln har tagits bort från kundvagnen");
+  } catch (error) {
+    return response.status(500).send("Internt serverfel");
+  }
+});
+// app.post ("/deleteItemFromCart", async(request, response)=>{
+//   const{item_id, sessionId}  = request.body
+//   try {
+//     const { rows } = await client.query("SELECT * FROM cart_items ");
+
+//       if (rows.length === 0) {
+//       return response.status(401).send("finns inget att ta bort från cart");
+
+//     } if() {
+//       await client.query("DELETE FROM ");
+//       response.status(200).send("utloggad, och alla tokens deletade ");
+//     }
+//   } catch (error) {
+//     return response.status(500).send("Internal Server Error");
+//   }
+// })
+
+app.put("/updateShoppingCart", async (request, response) => {
+  const cartItems = request.body;
+});
+//hämta alla carts som finns
 app.get("/shoppingCart", async (request, response) => {
   const { rows } = await client.query("SELECT * FROM carts ");
 
   return response.status(200).send(rows);
-});
-
-app.put("/updateShoppingCart", async (request, response) => {
-  const cartItems = request.body;
 });
 
 app.listen(8080, () => {

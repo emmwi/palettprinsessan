@@ -2,7 +2,7 @@
 import { Card, Img, Container, Info } from "../general-css/GeneralStyles";
 import { Key, useEffect, useState } from "react";
 
-export default function about() {
+export default function projects() {
   type Project = {
     project_id: number;
     name: string;

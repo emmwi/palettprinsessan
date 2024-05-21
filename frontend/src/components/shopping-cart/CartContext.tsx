@@ -7,6 +7,7 @@ import {
   useContext,
 } from "react";
 import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
 
 interface CartItem {
   id: number;
@@ -38,19 +39,47 @@ export const useCartContext = () => {
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
+  useEffect(() => {
+    doesCartExists();
+    fetch("http://localhost:8080/shoppingCart")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setCartItems(data);
+      })
+      .catch((error) => {
+        console.error("There was a problem fetching the cart:", error);
+      });
+  }, []);
+
   const addToCart = (item: CartItem) => {
     const isItemInCart = cartItems.find((cartItem) => cartItem.id === item.id);
+    let sessionId: string | undefined | null = doesCartExists();
+
+    if (sessionId === undefined) {
+      sessionId = localStorage.getItem("sessionId");
+    }
 
     if (isItemInCart) {
-      setCartItems(
-        cartItems.map((cartItem) =>
-          cartItem.id === item.id
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
-        )
+      const updatedCartItems = cartItems.map((cartItem) =>
+        cartItem.id === item.id
+          ? { ...cartItem, quantity: cartItem.quantity + 1 }
+          : cartItem
       );
+      setCartItems(updatedCartItems);
     } else {
-      setCartItems([...cartItems, { ...item, quantity: 1 }]);
+      const newCartItem = { ...item, quantity: 1, sessionId };
+      setCartItems([...cartItems, newCartItem]);
+
+      axios
+        .post("http://localhost:8080/addToCart", newCartItem)
+        .catch((error) => {
+          console.error("Error adding item to cart:", error);
+        });
     }
   };
 
@@ -59,6 +88,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       (cartItem) => cartItem.id !== item.id
     );
     setCartItems(newCartItems);
+
+    axios.post("http://localhost:8080/", newCartItems).catch((error) => {
+      console.error("Error adding item to cart:", error);
+    });
   };
 
   const clearCart = () => {
@@ -73,11 +106,15 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   //om det inte finns en cart staras det en och man får ett sessionsid  när man tycker på handlaknappen på patterns eller knitwear
+
   const doesCartExists = () => {
+    console.log("i början av deosssjs");
     if (cartItems.length === 0) {
       let sessionId = localStorage.getItem("sessionId");
+      console.log(sessionId);
 
       if (!sessionId) {
+        console.log("hej");
         sessionId = uuidv4();
         localStorage.setItem("sessionId", sessionId);
 
@@ -91,25 +128,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           console.error("Error starting session and creating cart:", error);
         });
       }
+      return sessionId;
     }
   };
-
-  useEffect(() => {
-    fetch("http://localhost:8080/shoppingCart")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        // Uppdatera varukorgen med den hämtade datan
-        setCartItems(data);
-      })
-      .catch((error) => {
-        console.error("There was a problem fetching the cart:", error);
-      });
-  }, []);
 
   return (
     <CartContext.Provider
