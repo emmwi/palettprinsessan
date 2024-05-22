@@ -43,7 +43,7 @@ export default function OrderProduct() {
     price: number;
   }) => {
     addToCart({
-      id: clickedItem.item_id as number,
+      item_id: clickedItem.item_id as number,
       image: clickedItem.image,
       name: clickedItem.name,
       price: clickedItem.price,

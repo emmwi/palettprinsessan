@@ -8,6 +8,10 @@ import {
   AdminContainer,
 } from "../Admin-Syles/AdminStyles";
 export default function AddPattern() {
+  // function handleSubmit(event: { preventDefault: () => void }) {
+  //   // event.preventDefault();
+  //   alert("The browser will not reload when the alert box is closed.");
+  // }
   return (
     <>
       <AdminContainer>
@@ -17,6 +21,7 @@ export default function AddPattern() {
             action="http://localhost:8080/patterns"
             method="post"
             encType="multipart/form-data"
+            // onSubmit={handleSubmit}
           >
             <label>Namn</label>
             <TextInput type="input" name="name" />

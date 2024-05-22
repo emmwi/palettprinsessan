@@ -10,15 +10,17 @@ import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 
 interface CartItem {
-  id: number;
+  // [x: string]: any; //vad är detta, fråga vanja?
   image: string;
   name: string;
   price: number;
   quantity: number;
+  item_id: number;
 }
 
 interface CartContextProps {
   cartItems: CartItem[];
+  setCartItems: (items: CartItem[]) => void;
   addToCart: (item: CartItem) => void;
   removeFromCart: (item: CartItem) => void;
   clearCart: () => void;
@@ -41,6 +43,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     doesCartExists();
+  }, []);
+  useEffect(() => {
+    fetchCartItem();
+  }, []);
+
+  const fetchCartItem = () => {
     fetch("http://localhost:8080/shoppingCart")
       .then((response) => {
         if (!response.ok) {
@@ -54,24 +62,22 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       .catch((error) => {
         console.error("There was a problem fetching the cart:", error);
       });
-  }, []);
-
+  };
   const addToCart = (item: CartItem) => {
-    const isItemInCart = cartItems.find((cartItem) => cartItem.id === item.id);
+    const isItemInCart = cartItems.find((cartItem) => {
+      console.log("cartitems", cartItems);
+      console.log("Current cartItem id in addtocart:", cartItem.item_id);
+      console.log("Item id to check in addtocart:", item.item_id);
+      return cartItem.item_id === item.item_id;
+    });
+    console.log(isItemInCart);
     let sessionId: string | undefined | null = doesCartExists();
 
     if (sessionId === undefined) {
       sessionId = localStorage.getItem("sessionId");
     }
 
-    if (isItemInCart) {
-      const updatedCartItems = cartItems.map((cartItem) =>
-        cartItem.id === item.id
-          ? { ...cartItem, quantity: cartItem.quantity + 1 }
-          : cartItem
-      );
-      setCartItems(updatedCartItems);
-    } else {
+    if (!isItemInCart) {
       const newCartItem = { ...item, quantity: 1, sessionId };
       setCartItems([...cartItems, newCartItem]);
 
@@ -81,17 +87,42 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           console.error("Error adding item to cart:", error);
         });
     }
+    // else {
+    //     const updatedCartItems = cartItems.map((cartItem) =>
+    //     cartItem.id === item.id
+    //       ? { ...cartItem, quantity: cartItem.quantity + 1 }
+    //       : cartItem
+    //   );
+    //   setCartItems(updatedCartItems);
+    // }
   };
 
   const removeFromCart = (item: CartItem) => {
-    const newCartItems = cartItems.filter(
-      (cartItem) => cartItem.id !== item.id
-    );
-    setCartItems(newCartItems);
+    // const sessionId = localStorage.getItem("sessionId");
+    console.log(cartItems);
 
-    axios.post("http://localhost:8080/", newCartItems).catch((error) => {
-      console.error("Error adding item to cart:", error);
+    // if (!sessionId) {
+    //   console.error("Session ID is missing or invalid");
+    //   return;
+    // }
+    // console.log(sessionId);
+    const itemToRemove = cartItems.filter((cartItem) => {
+      console.log("Current cartItem id:", cartItem.item_id);
+      console.log("Item id to remove:", item.item_id);
+      return cartItem.item_id !== item.item_id;
     });
+    console.log("vad gör denna delete", itemToRemove);
+
+    setCartItems(itemToRemove);
+    const sessionId = localStorage.getItem("sessionId");
+    axios
+      .post("http://localhost:8080/deleteItemFromCart", {
+        item_id: item.item_id,
+        sessionId: sessionId,
+      })
+      .catch((error) => {
+        console.error("Error removing item from cart:", error);
+      });
   };
 
   const clearCart = () => {
@@ -129,12 +160,15 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         });
       }
       return sessionId;
+    } else {
+      return localStorage.getItem("sessionId");
     }
   };
 
   return (
     <CartContext.Provider
       value={{
+        setCartItems,
         cartItems,
         addToCart,
         removeFromCart,

@@ -9,43 +9,45 @@ import {
   OderButton,
   Price,
 } from "../general-css/GeneralStyles";
+import axios from "axios";
+import { useEffect } from "react";
 
 export default function ShoppingCart() {
-  const { cartItems, addToCart, doesCartExists, clearCart, removeFromCart } =
-    useCartContext();
+  const {
+    cartItems,
+    setCartItems,
+    addToCart,
+    doesCartExists,
+    clearCart,
+    removeFromCart,
+    getCartTotal,
+  } = useCartContext();
+
+  useEffect(() => {
+    getCartItems();
+  }, []);
+
+  async function getCartItems() {
+    try {
+      const response = await axios.get("http://localhost:8080/getCartItems");
+      console.log(response.data);
+      setCartItems(response.data);
+    } catch (error) {
+      console.error("Error adding item to cart:", error);
+    }
+  }
 
   return (
     <>
       <Container>
         {cartItems.length === 0 && <p> Din kundkorg är tom</p>}
-        {cartItems.map((item) => (
-          <Card key={item.id}>
+        {cartItems.map((item, index) => (
+          <Card key={index}>
             <h3>{item.name}</h3>
             <Img src={`http://localhost:8080${item.image}`} alt={item.name} />
 
             <p>{item.price} kr</p>
-            <button
-              onClick={() => {
-                addToCart(item);
-              }}
-            >
-              +
-            </button>
-            <p>{item.quantity}</p>
-            <button
-              onClick={() => {
-                removeFromCart(item);
-              }}
-            >
-              -
-            </button>
-            {/* <button
-              onClick={() => {
-                clearCart();
-              }}
-            >
-              Clear cart
-            </button> */}
+
             <button
               onClick={() => {
                 removeFromCart(item);
@@ -55,6 +57,7 @@ export default function ShoppingCart() {
             </button>
           </Card>
         ))}
+        {/* <span> {getCartTotal}</span> */}
       </Container>
     </>
   );

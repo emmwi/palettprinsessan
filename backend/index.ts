@@ -267,6 +267,7 @@ app.get("/getItems", async (request, response) => {
 
     const itemData = rows.map(
       (items: {
+        // id: number;
         item_id: number;
         name: string;
         description: string;
@@ -274,6 +275,7 @@ app.get("/getItems", async (request, response) => {
         price: Number;
         type: string;
       }) => ({
+        // id: items.id,
         item_id: items.item_id,
         name: items.name,
         description: items.description,
@@ -303,9 +305,11 @@ app.post("/createSessionAndCart", async (request, response) => {
 
 //lägga in saker i cart
 app.post("/addToCart", async (request, response) => {
-  const { sessionId, id, quantity } = request.body;
-  console.log(request.body);
-  console.log(sessionId);
+  const { sessionId, quantity, item_id } = request.body;
+  console.log("Request body:", request.body);
+  console.log("sessionId:", sessionId);
+  console.log("quantity:", quantity);
+  console.log("item_id:", item_id);
   try {
     const { rows } = await client.query(
       "select * from carts where session_id = $1",
@@ -314,13 +318,21 @@ app.post("/addToCart", async (request, response) => {
     console.log(rows);
     if (rows.length !== 0) {
       const cart_id = rows[0].cart_id;
-      console.log(cart_id);
-      const result = await client.query(
-        "INSERT INTO cart_items ( cart_id, item_id, quantity) VALUES ($1, $2, $3) RETURNING *",
-        [cart_id, id, quantity]
+      console.log("itemid", item_id);
+      console.log("cartid", cart_id);
+      const existingItem = await client.query(
+        "SELECT * FROM cart_items WHERE cart_id = $1 AND item_id = $2",
+        [cart_id, item_id]
       );
-
-      response.status(201).json(result.rows[0]);
+      if (existingItem.rows.length === 0) {
+        const result = await client.query(
+          "INSERT INTO cart_items ( cart_id, item_id, quantity) VALUES ($1, $2, $3) RETURNING *",
+          [cart_id, item_id, quantity]
+        );
+        response.status(201).send(result.rows[0]);
+      } else {
+        response.send("kan inte lägga till flera items av samma id i cart");
+      }
     }
   } catch (error) {
     console.error("Error adding item to cart:", error);
@@ -330,67 +342,99 @@ app.post("/addToCart", async (request, response) => {
 // //deleta om man tar bort saker från cart
 app.post("/deleteItemFromCart", async (request, response) => {
   const { item_id, sessionId } = request.body;
-
+  console.log("session id", sessionId);
+  console.log("item_id", item_id);
+  // Steg 1: Kontrollera om både item_id och sessionId finns
   if (!item_id || !sessionId) {
     return response.status(400).send("item_id och sessionId krävs");
   }
 
   try {
-    // Kontrollera om det finns några artiklar i kundvagnen för den givna sessionId
-    const { rows } = await client.query(
-      "SELECT * FROM cart_items WHERE session_id = $1",
+    //hämtar cart_id i carts för att kunna använda senare
+    const result = await client.query(
+      "SELECT cart_id FROM carts WHERE session_id = $1",
       [sessionId]
     );
+    //hämtar rätt cart_id basserat på sessionId
+    const cart_id = result.rows[0].cart_id;
 
+    const { rows } = await client.query(
+      "SELECT item_id FROM cart_items WHERE item_id = $1",
+      [item_id]
+    );
     if (rows.length === 0) {
       return response
         .status(404)
         .send("Kundvagnen är tom eller sessionId finns inte");
     }
+    const itemExists = rows.find((item) => item.item_id === item_id);
+    console.log("finns det jag vill ta bort?", itemExists.item_id);
 
-    // Kontrollera om artikeln med det specifika item_id finns i kundvagnen
-    const itemExists = rows.filter((items) => items.item_id === item_id);
-
-    if (itemExists.length === 0) {
+    if (!itemExists) {
       return response.status(404).send("Artikeln finns inte i kundvagnen");
     }
 
-    // Ta bort artikeln med det specifika item_id från kundvagnen
+    //tar bort cart_item som passar item_id och cart_id
     await client.query(
-      "DELETE FROM cart_items WHERE item_id = $1 AND session_id = $2",
-      [item_id, sessionId]
+      "DELETE FROM cart_items WHERE item_id = $1 AND cart_id = $2",
+      [item_id, cart_id]
     );
-
     response.status(200).send("Artikeln har tagits bort från kundvagnen");
   } catch (error) {
+    console.error("Internt serverfel:", error);
     return response.status(500).send("Internt serverfel");
   }
 });
-// app.post ("/deleteItemFromCart", async(request, response)=>{
-//   const{item_id, sessionId}  = request.body
-//   try {
-//     const { rows } = await client.query("SELECT * FROM cart_items ");
 
-//       if (rows.length === 0) {
-//       return response.status(401).send("finns inget att ta bort från cart");
-
-//     } if() {
-//       await client.query("DELETE FROM ");
-//       response.status(200).send("utloggad, och alla tokens deletade ");
-//     }
-//   } catch (error) {
-//     return response.status(500).send("Internal Server Error");
-//   }
-// })
-
-app.put("/updateShoppingCart", async (request, response) => {
-  const cartItems = request.body;
-});
+// app.put("/updateShoppingCart", async (request, response) => {
+//   const cartItems = request.body;
+// });
 //hämta alla carts som finns
 app.get("/shoppingCart", async (request, response) => {
   const { rows } = await client.query("SELECT * FROM carts ");
 
   return response.status(200).send(rows);
+});
+
+//hämta alla objekt som finns i cart_item och tar info från items
+app.get("/getCartItems", async (request, response) => {
+  try {
+    const result = await client.query("SELECT cart_id FROM cart_items");
+    const cartId = result.rows[0].cart_id; // Hämtar cart_id från den första raden, om den finns
+    if (!cartId) {
+      throw new Error("Cart ID not found");
+    }
+    const { rows } = await client.query(
+      "SELECT * FROM items INNER JOIN cart_items ON items.item_id = cart_items.item_id WHERE cart_items.cart_id = $1;",
+      [cartId]
+    );
+    const itemData = rows.map(
+      (items: {
+        item_id: number;
+        name: string;
+        description: string;
+        image: string;
+        price: Number;
+        type: string;
+      }) => ({
+        item_id: items.item_id,
+        name: items.name,
+        description: items.description,
+        image:
+          items.type === "knitwear"
+            ? `/uploads/knitwear/${items.image}`
+            : `/uploads/patternsPDF/${items.image}`,
+        price: items.price,
+        type: items.type,
+      })
+    );
+
+    console.log("vad är detta", rows);
+    return response.status(200).send(itemData);
+  } catch (error) {
+    console.error("Error fetching cart items:", error);
+    return response.status(500).send({ error: "Internal Server Error" });
+  }
 });
 
 app.listen(8080, () => {
