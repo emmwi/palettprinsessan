@@ -7,7 +7,14 @@ import {
   AdminForm,
   AdminContainer,
 } from "../Admin-Syles/AdminStyles";
+
+import { FormEvent } from "react";
 export default function AddPattern() {
+  const handleSumbit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    alert("plagg uppladdad");
+  };
+
   return (
     <>
       <AdminContainer>
@@ -17,7 +24,7 @@ export default function AddPattern() {
             action="http://localhost:8080/knitwear"
             method="post"
             encType="multipart/form-data"
-            // onSubmit={(e) => {e.preventDefault(); e.prop}}
+            onSubmit={handleSumbit}
           >
             <label>Namn</label>
             <TextInput type="input" name="name" />

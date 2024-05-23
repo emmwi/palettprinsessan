@@ -1,6 +1,8 @@
 "use client";
 import { Key, useEffect, useState } from "react";
 import { useCartContext } from "../shopping-cart/CartContext";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import {
   Card,
@@ -51,12 +53,31 @@ export default function OrderProduct() {
     });
 
     doesCartExists();
+    toast(`${clickedItem.name} finns nu varukorgen!`, {
+      position: "top-center",
+      autoClose: 2000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "light",
+      style: {
+        backgroundColor: "",
+        color: "#000",
+        border: "1px solid #4CAF50",
+        borderRadius: "8px",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+        padding: "16px",
+        fontSize: "16px",
+      },
+    });
   };
 
   return (
     <>
       <Container>
         <h1>Stickade plagg</h1>
+        <ToastContainer />
         {items !== null &&
           items.map(
             (item: {

@@ -1,7 +1,9 @@
 "use client";
 import { useCartContext } from "../shopping-cart/CartContext";
 import axios from "axios";
-import { Key, useEffect, useState, useContext } from "react";
+import { Key, useEffect, useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   Card,
   Img,
@@ -51,12 +53,31 @@ export default function PatternContent() {
       quantity: 1,
     });
     doesCartExists();
+    toast(`${clickedItem.name} finns nu i varukorgen!`, {
+      position: "top-center",
+      autoClose: 2000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      theme: "light",
+      style: {
+        backgroundColor: "",
+        color: "#000",
+        border: "1px solid #4CAF50",
+        borderRadius: "8px",
+        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+        padding: "16px",
+        fontSize: "16px",
+      },
+    });
   };
 
   return (
     <>
       <Container>
         <h1>Mönster</h1>
+        <ToastContainer />
         {items !== null &&
           items.map(
             (item: {
@@ -78,7 +99,9 @@ export default function PatternContent() {
                 <OderButton
                   type="button"
                   value="Handla"
-                  onClick={() => handleClick(item)}
+                  onClick={() => {
+                    handleClick(item);
+                  }}
                 />
               </Card>
             )

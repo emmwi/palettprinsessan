@@ -1,4 +1,5 @@
 import styled from "@emotion/styled";
+import { exportTraceState } from "next/dist/trace";
 
 export const HeaderSyle = styled.header`
   /* background: linear-gradient(
@@ -25,4 +26,10 @@ export const LogoImg = styled.img`
   width: 5rem;
   border-radius: 100%;
   margin-left: 0;
+`;
+
+export const HeaderDiv = styled.div`
+  a {
+    text-decoration: none;
+  }
 `;

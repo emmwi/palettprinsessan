@@ -37,3 +37,12 @@ footer {
   );
   height: 15em;
 }
+
+/* stylar toaster när man lägger till vara */
+.Toastify__toast-container {
+  background-color: transparent !important;
+}
+
+.Toastify__toast {
+  background-color: #faebd7 !important;
+}

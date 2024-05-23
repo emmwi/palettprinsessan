@@ -7,11 +7,13 @@ import {
   AdminForm,
   AdminContainer,
 } from "../Admin-Syles/AdminStyles";
+import { FormEvent } from "react";
 export default function AddPattern() {
-  // function handleSubmit(event: { preventDefault: () => void }) {
-  //   // event.preventDefault();
-  //   alert("The browser will not reload when the alert box is closed.");
-  // }
+  const handleSumbit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    alert("produkt uppladdad");
+  };
+
   return (
     <>
       <AdminContainer>
@@ -21,7 +23,7 @@ export default function AddPattern() {
             action="http://localhost:8080/patterns"
             method="post"
             encType="multipart/form-data"
-            // onSubmit={handleSubmit}
+            onSubmit={handleSumbit}
           >
             <label>Namn</label>
             <TextInput type="input" name="name" />

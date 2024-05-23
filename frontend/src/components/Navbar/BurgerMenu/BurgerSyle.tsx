@@ -1,5 +1,5 @@
-// import styled from "styled-components";
-import styled from "@emotion/styled";
+import styled from "styled-components"; //använder styled här för att emotion ger error
+
 //tar emot props från burger som i sin tur hämtar den från usecontext
 interface BurgerMenuProps {
   $isopen: boolean | string;

@@ -10,7 +10,6 @@ import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 
 interface CartItem {
-  // [x: string]: any; //vad är detta, fråga vanja?
   image: string;
   name: string;
   price: number;
@@ -129,11 +128,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setCartItems([]);
   };
 
+  //ger rätt summa för allt man köpt.
   const getCartTotal = () => {
-    return cartItems.reduce(
-      (total, item) => total + item.price * item.quantity,
-      0
-    );
+    return cartItems.reduce((total, item) => {
+      const price = Number(item.price);
+      // Kontrollera att price är ett giltigt nummer
+      if (isNaN(price)) {
+        console.error("Invalid price for item", item);
+        return total;
+      }
+      return total + price;
+    }, 0);
   };
 
   //om det inte finns en cart staras det en och man får ett sessionsid  när man tycker på handlaknappen på patterns eller knitwear

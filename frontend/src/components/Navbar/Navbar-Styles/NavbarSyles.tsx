@@ -1,6 +1,7 @@
 // import styled from "styled-components";
 import styled from "@emotion/styled";
 import "@fontsource/italianno";
+import { StyledEngineProvider } from "@mui/material";
 
 interface NavUlistProps {
   $isopen: boolean;
@@ -10,24 +11,33 @@ export const CartContainer = styled.div`
   display: flex;
   justify-content: end;
   padding-right: 1.3em;
+  text-decoration: none;
+
+  a {
+    text-decoration: none;
+    color: black;
+  }
 `;
+
 export const CartIcons = styled.img`
   width: 2em;
   background: transparent;
 `;
-
+export const CartSpan = styled.span`
+  font-size: 1.5em;
+  /* text-decoration: none; */
+  text-decoration: none !important;
+`;
 export const NavUlist = styled.ul<NavUlistProps>`
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
   background-color: #8ccbc1;
-
   position: fixed;
   transform: ${({ $isopen }) =>
     $isopen ? "translateX(0)" : "translateX(100%)"};
   top: 0;
   right: 0;
-
   height: 100vh;
   padding-top: 5.5rem;
   transition: transform 0.3s ease-in-out;

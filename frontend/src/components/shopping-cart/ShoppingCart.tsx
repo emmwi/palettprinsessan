@@ -39,26 +39,29 @@ export default function ShoppingCart() {
 
   return (
     <>
-      <Container>
-        {cartItems.length === 0 && <p> Din kundkorg är tom</p>}
-        {cartItems.map((item, index) => (
-          <Card key={index}>
-            <h3>{item.name}</h3>
-            <Img src={`http://localhost:8080${item.image}`} alt={item.name} />
+      <div>
+        <Container>
+          {cartItems.length === 0 && <p> Din kundkorg är tom</p>}
+          {cartItems.map((item, index) => (
+            <Card key={index}>
+              <h3>{item.name}</h3>
+              <Img src={`http://localhost:8080${item.image}`} alt={item.name} />
 
-            <p>{item.price} kr</p>
+              <p>{item.price} kr</p>
 
-            <button
-              onClick={() => {
-                removeFromCart(item);
-              }}
-            >
-              <RiDeleteBin5Line />
-            </button>
-          </Card>
-        ))}
-        {/* <span> {getCartTotal}</span> */}
-      </Container>
+              <button
+                onClick={() => {
+                  removeFromCart(item);
+                }}
+              >
+                <RiDeleteBin5Line />
+              </button>
+            </Card>
+          ))}
+        </Container>
+        <p>Summa: {getCartTotal()} kr</p>
+        {/* {cartItems.length > 0 ? <p>{cartItems.length}</p> : null} */}
+      </div>
     </>
   );
 }

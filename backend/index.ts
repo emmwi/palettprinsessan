@@ -14,7 +14,6 @@ const app = express();
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-// app.use(express.static(path.join(path.resolve(), "projects")));
 
 //visar vart static ska kolla på i för mapp
 app.use(
@@ -84,29 +83,6 @@ app.post("/project", upload.single("image"), async (request, response) => {
   }
 });
 
-//hämta mönster
-app.get("/patterns", async (_request, response) => {
-  const { rows } = await client.query("SELECT * FROM patterns ");
-  const patternData = rows.map(
-    (pattern: {
-      pattern_id: number;
-      name: string;
-      description: string;
-      image: string;
-      pdf: string;
-      price: Number;
-    }) => ({
-      pattern_id: pattern.pattern_id,
-      name: pattern.name,
-      description: pattern.description,
-      image: `/uploads/patternsPDF/${pattern.image}`,
-      pdf: pattern.pdf,
-      price: pattern.price,
-    })
-  );
-  return response.send(patternData);
-});
-
 //lägga till nya mönster
 interface Fields {
   image: FieldObject[];
@@ -169,26 +145,6 @@ app.post(
   }
 );
 
-//hömta produketer/stickade plagg
-app.get("/knitwears", async (_request, response) => {
-  const { rows } = await client.query("SELECT * FROM knitwear ");
-  const knitwearData = rows.map(
-    (knitwear: {
-      knitwear_id: number;
-      name: string;
-      description: string;
-      image: string;
-      price: Number;
-    }) => ({
-      knitwear_id: knitwear.knitwear_id,
-      name: knitwear.name,
-      description: knitwear.description,
-      image: `/uploads/knitwear/${knitwear.image}`,
-      price: knitwear.price,
-    })
-  );
-  return response.send(knitwearData);
-});
 //lögga till stickade plagg
 app.post(
   "/knitwear",
@@ -261,13 +217,12 @@ app.post("/logout/", async (_request, response) => {
 });
 
 //hämtar alla items som finns att köpa
-app.get("/getItems", async (request, response) => {
+app.get("/getItems", async (_request, response) => {
   try {
     const { rows } = await client.query("SELECT * FROM items");
 
     const itemData = rows.map(
       (items: {
-        // id: number;
         item_id: number;
         name: string;
         description: string;
@@ -275,7 +230,6 @@ app.get("/getItems", async (request, response) => {
         price: Number;
         type: string;
       }) => ({
-        // id: items.id,
         item_id: items.item_id,
         name: items.name,
         description: items.description,
@@ -397,7 +351,7 @@ app.get("/shoppingCart", async (request, response) => {
 });
 
 //hämta alla objekt som finns i cart_item och tar info från items
-app.get("/getCartItems", async (request, response) => {
+app.get("/getCartItems", async (_request, response) => {
   try {
     const result = await client.query("SELECT cart_id FROM cart_items");
     const cartId = result.rows[0].cart_id; // Hämtar cart_id från den första raden, om den finns
@@ -414,6 +368,7 @@ app.get("/getCartItems", async (request, response) => {
         name: string;
         description: string;
         image: string;
+        pdf: string | undefined | null;
         price: Number;
         type: string;
       }) => ({
@@ -424,6 +379,10 @@ app.get("/getCartItems", async (request, response) => {
           items.type === "knitwear"
             ? `/uploads/knitwear/${items.image}`
             : `/uploads/patternsPDF/${items.image}`,
+        pdf:
+          items.type === "pattern"
+            ? `/uploads/patternsPDF/${items.image}`
+            : null,
         price: items.price,
         type: items.type,
       })

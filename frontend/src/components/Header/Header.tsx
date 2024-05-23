@@ -1,16 +1,21 @@
 "use client";
-import { LogoImg, HeaderSyle, LogoName } from "./HeaderStyles";
+import Link from "next/link";
+import { LogoImg, HeaderSyle, LogoName, HeaderDiv } from "./HeaderStyles";
 
 export default function Header() {
   return (
     <>
-      <HeaderSyle>
-        <LogoImg
-          src="/palett2Small.jpg"
-          alt="logo, black cat with rainbowcolor on maine"
-        />
-        <LogoName>Palettprinsessan</LogoName>
-      </HeaderSyle>
+      <HeaderDiv>
+        <Link href={"/"}>
+          <HeaderSyle>
+            <LogoImg
+              src="/palett2Small.jpg"
+              alt="logo, black cat with rainbowcolor on maine"
+            />
+            <LogoName>Palettprinsessan</LogoName>
+          </HeaderSyle>
+        </Link>
+      </HeaderDiv>
     </>
   );
 }
