@@ -9,7 +9,6 @@ import {
   OderButton,
   Price,
 } from "../general-css/GeneralStyles";
-import axios from "axios";
 import { useEffect } from "react";
 
 export default function ShoppingCart() {
@@ -52,7 +51,6 @@ export default function ShoppingCart() {
           ))}
         </Container>
         <p>Summa: {getCartTotal()} kr</p>
-        {/* {cartItems.length > 0 ? <p>{cartItems.length}</p> : null} */}
       </div>
     </>
   );

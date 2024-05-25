@@ -46,58 +46,50 @@ export const useCartContext = () => {
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [sessionId, setSessionId] = useState<CartSessions[]>([]);
+  // const [sessionId, setSessionId] = useState<CartSessions[]>([]); tar troligen bort detta också
 
-  //hämtar om det finns carts.
-  useEffect(() => {
-    fetchCarts();
-  }, []);
+  //ska jag behålla denna, tar troligen bort denna?
+  // const fetchCarts = () => {
+  //   fetch("http://localhost:8080/shoppingCart")
+  //     .then((response) => {
+  //       if (!response.ok) {
+  //         throw new Error("Network response was not ok");
+  //       }
+  //       return response.json();
+  //     })
+  //     .then((data) => {
+  //       console.log("data från fetchcartitem", data);
+  //       setSessionId(data);
+  //     })
+  //     .catch((error) => {
+  //       console.error("There was a problem fetching the cart:", error);
+  //     });
+  // };
 
-  //ska jag behålla denna?
-  const fetchCarts = () => {
-    fetch("http://localhost:8080/shoppingCart")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("data från fetchcartitem", data);
-        setSessionId(data);
-      })
-      .catch((error) => {
-        console.error("There was a problem fetching the cart:", error);
-      });
-  };
-
-  //om det inte finns en cart staras det en och man får ett sessionsid  när man tycker på handlaknappen på patterns eller knitwear
+  //klar 20240525
   const doesCartExists = () => {
-    //  Kollar ifall det finns varor i en varukorg
-    if (cartItems.length === 0) {
-      let sessionId = localStorage.getItem("sessionId");
-      console.log(sessionId);
+    //  sätter sessionId till sessionId som finns i local storage
+    let sessionId = localStorage.getItem("sessionId");
+    console.log(sessionId);
+    //om det inte finns ett sessionId i localstorage, sätts ett sessionId och sättes till localstorage
+    if (!sessionId) {
+      sessionId = uuidv4();
+      localStorage.setItem("sessionId", sessionId);
 
-      if (!sessionId) {
-        sessionId = uuidv4();
-        localStorage.setItem("sessionId", sessionId);
-
-        fetch("http://localhost:8080/createSessionAndCart", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ sessionId }),
-        }).catch((error) => {
-          console.error("Error starting session and creating cart:", error);
-        });
-      }
-      return sessionId;
-    } else {
-      return localStorage.getItem("sessionId");
+      fetch("http://localhost:8080/createSessionAndCart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ sessionId }),
+      }).catch((error) => {
+        console.error("Error starting session and creating cart:", error);
+      });
     }
+    return sessionId;
+    //returnerar sessionId
   };
-  //hämtar det som finns i shoppingcart,
+  //hämtar det som finns i shoppingcart, klart 20240525
   async function getCartItems() {
     try {
       //kollar om det finns en cart eller inte
@@ -105,48 +97,49 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       if (!sessionId) {
         throw new Error("session Id  finns inte");
       }
-      console.log("session id i get cartitems", sessionId);
+      //skicka en get till backend och skicka med sessionId som query med params
       const response = await axios.get("http://localhost:8080/getCartItems", {
         params: { sessionId },
       });
-      console.log(response.data);
+      //sätter cartItems till den datan som finns i cart_items tabellen
+      console.log(response.data, "data från get cartitems");
       setCartItems(response.data);
     } catch (error) {
-      console.error("Error adding item to cart:", error);
+      console.error("Error vid hämtning av varukorgen:", error);
     }
   }
-  //Lägga till i shoppingCart
+
+  //Lägga till i shoppingCart - be om hjälp på denna
   const addToCart = (item: CartItem) => {
+    //kollar om varan finns i varukorgen eller inte
     const isItemInCart = cartItems.find((cartItem) => {
-      console.log("cartitems", cartItems);
-      console.log("Current cartItem id in addtocart:", cartItem.item_id);
-      console.log("Item id to check in addtocart:", item.item_id);
       return cartItem.item_id === item.item_id;
     });
-    console.log(isItemInCart);
-    let sessionId: string | undefined | null = doesCartExists();
-
-    if (sessionId === undefined) {
-      sessionId = localStorage.getItem("sessionId");
-    }
-
+    //tilldelar sessionId till det som finns när man kör doesCartExists
+    const sessionId: string | undefined | null = doesCartExists();
+    //om item inte finns i cart läggs den till i newCartItem
     if (!isItemInCart) {
-      const newCartItem = { ...item, quantity: 1, sessionId };
-
+      // const newCartItem = { ...item, quantity: 1, sessionId };
+      //kör en post med newCartItem till backend och därefter uppdateras det på frontend med setCartItems
       axios
-        .post("http://localhost:8080/addToCart", newCartItem)
-        .then((response) => {
-          console.log("svar från backend", response.data);
-          //sätter setCartItems med nytt värde efter att post har gjorts till backendet.
-          setCartItems([...cartItems, newCartItem]);
+        .post("http://localhost:8080/addToCart", {
+          ...item,
+          quantity: 1,
+          sessionId,
         })
+        .then((response) => {
+          console.log("AddToCart response", response.data);
+          setCartItems([...cartItems, response.data]);
+        })
+
         .catch((error) => {
           console.error("Error adding item to cart:", error);
         });
     }
+    //för att kunna lägga till flera varor
     // else {
-    //     const updatedCartItems = cartItems.map((cartItem) =>
-    //     cartItem.id === item.id
+    //   const updatedCartItems = cartItems.map((cartItem) =>
+    //     cartItem.item_id === item.item_id
     //       ? { ...cartItem, quantity: cartItem.quantity + 1 }
     //       : cartItem
     //   );
@@ -154,22 +147,48 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     // }
   };
 
-  const removeFromCart = (item: CartItem) => {
-    // const sessionId = localStorage.getItem("sessionId");
-    console.log(cartItems);
+  // Funkar inte, be om hjälp
+  // const addToCart = (item: CartItem) => {
+  //   //kollar om varan finns i varukorgen eller inte
+  //   const isItemInCart = cartItems.find((cartItem) => {
+  //     return cartItem.item_id === item.item_id;
+  //   });
+  //   //tilldelar sessionId till det som finns när man kör doesCartExists
+  //   const sessionId: string | undefined | null = doesCartExists();
+  //   //om item  finns i cart läggs den till i updatedCartimes
+  //   if (isItemInCart) {
+  //     const updatedCartItems = cartItems.map((cartItem) =>
+  //       cartItem.item_id === item.item_id
+  //         ? { ...cartItem, quantity: cartItem.quantity + 1 }
+  //         : cartItem
+  //     );
+  //     setCartItems(updatedCartItems);
+  //   } else {
+  //     // const newCartItem = { ...item, quantity: 1, sessionId };
+  //     //kör en post med newCartItem till backend och därefter uppdateras det på frontend med setCartItems
+  //     axios
+  //       .post("http://localhost:8080/addToCart", {
+  //         ...item,
+  //         quantity: 1,
+  //         sessionId,
+  //       })
+  //       .then((response) => {
+  //         console.log("AddToCart response", response.data);
+  //         setCartItems([...cartItems, response.data]);
+  //       })
 
-    // if (!sessionId) {
-    //   console.error("Session ID is missing or invalid");
-    //   return;
-    // }
-    // console.log(sessionId);
+  //       .catch((error) => {
+  //         console.error("Error adding item to cart:", error);
+  //       });
+  //   }
+  // };
+
+  const removeFromCart = (item: CartItem) => {
+    //filtererar items för att hitta det som ska tas bort
     const itemToRemove = cartItems.filter((cartItem) => {
-      console.log("Current cartItem id:", cartItem.item_id);
-      console.log("Item id to remove:", item.item_id);
       return cartItem.item_id !== item.item_id;
     });
-    console.log("vad gör denna delete", itemToRemove);
-
+    //sätter sessionId för att skicka med till backend.
     const sessionId = localStorage.getItem("sessionId");
     axios
       .post("http://localhost:8080/deleteItemFromCart", {
@@ -177,7 +196,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         sessionId: sessionId,
       })
       .then((response) => {
-        console.log("svar från backend gällande removeFromCart", response.data);
+        console.log("deleteItemFromCart response", response.data);
         //uppdaterar setCartItem efter att det tagits bort från databasen.
         setCartItems(itemToRemove);
       })
@@ -194,11 +213,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const getCartTotal = () => {
     return cartItems.reduce((total, item) => {
       const price = Number(item.price);
-      // Kontrollera att price är ett giltigt nummer
-      if (isNaN(price)) {
-        console.error("Invalid price for item", item);
-        return total;
-      }
+
       return total + price;
     }, 0);
   };

@@ -14,7 +14,8 @@ import {
 } from "../general-css/GeneralStyles";
 
 export default function OrderProduct() {
-  const { cartItems, addToCart, doesCartExists } = useCartContext();
+  const { cartItems, addToCart, doesCartExists, getCartItems } =
+    useCartContext();
   console.log("cartcontext hittas");
   const [items, setItem] = useState([]);
 
@@ -95,12 +96,27 @@ export default function OrderProduct() {
                 />
                 <Info>{item.description},</Info>
                 <Price>{item.price} kr</Price>
-
+                {/*
                 <OderButton
                   type="button"
                   value="Handla"
                   onClick={() => handleClick(item)}
-                />
+                /> */}
+                {!cartItems.some(
+                  (cartItem) => cartItem.item_id === item.item_id
+                ) ? (
+                  <OderButton
+                    type="button"
+                    value="Handla"
+                    onClick={() => handleClick(item)}
+                  />
+                ) : (
+                  <OderButton
+                    type="button"
+                    value="Tillagd i varukorgen"
+                    disabled
+                  />
+                )}
               </Card>
             )
           )}

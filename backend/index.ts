@@ -7,6 +7,7 @@ import path from "path";
 import multer from "multer";
 import { fileURLToPath } from "url";
 import { v4 as uuidv4 } from "uuid";
+import { constants } from "buffer";
 __dirname = path.dirname(__filename);
 
 const app = express();
@@ -224,7 +225,7 @@ app.post("/addToCart", async (request, response) => {
       "select * from carts where session_id = $1",
       [sessionId]
     );
-    console.log(rows);
+    // console.log(rows);
     if (rows.length !== 0) {
       const cart_id = rows[0].cart_id;
       console.log("itemid", item_id);
@@ -233,6 +234,8 @@ app.post("/addToCart", async (request, response) => {
         "SELECT * FROM cart_items WHERE cart_id = $1 AND item_id = $2",
         [cart_id, item_id]
       );
+
+      console.log("existing item i add to cart", existingItem.rows.length);
       if (existingItem.rows.length === 0) {
         const result = await client.query(
           "INSERT INTO cart_items ( cart_id, item_id, quantity) VALUES ($1, $2, $3) RETURNING *",
@@ -240,7 +243,11 @@ app.post("/addToCart", async (request, response) => {
         );
         response.status(201).send(result.rows[0]);
       } else {
-        response.send("kan inte lägga till flera items av samma id i cart");
+        response
+          .status(404)
+          .send(
+            "bad request, kan inte lägga till flera items av samma id i cart"
+          );
       }
     }
   } catch (error) {
@@ -248,16 +255,15 @@ app.post("/addToCart", async (request, response) => {
     response.status(500).send("Internal Server Error");
   }
 });
-// //deleta om man tar bort saker från cart
+
+//deleta om man tar bort saker från cart
 app.post("/deleteItemFromCart", async (request, response) => {
   const { item_id, sessionId } = request.body;
-  console.log("session id", sessionId);
-  console.log("item_id", item_id);
+
   // Steg 1: Kontrollera om både item_id och sessionId finns
   if (!item_id || !sessionId) {
     return response.status(400).send("item_id och sessionId krävs");
   }
-
   try {
     //hämtar cart_id i carts för att kunna använda senare
     const result = await client.query(
@@ -293,16 +299,6 @@ app.post("/deleteItemFromCart", async (request, response) => {
     console.error("Internt serverfel:", error);
     return response.status(500).send("Internt serverfel");
   }
-});
-
-// app.put("/updateShoppingCart", async (request, response) => {
-//   const cartItems = request.body;
-// });
-//hämta alla carts som finns
-app.get("/shoppingCart", async (request, response) => {
-  const { rows } = await client.query("SELECT * FROM carts ");
-
-  return response.status(200).send(rows);
 });
 
 //hämta alla objekt som finns i cart_item och tar info från items
