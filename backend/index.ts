@@ -110,8 +110,6 @@ app.post(
 
       console.log(request.files);
       if (request.files !== undefined) {
-        // console.log((request.files as unknown as Fields).image[0].filename);
-        // console.log(request.files.pdf[0].filename);
         //lägga in samma sak i items-tabellen också så att de kan nås i cart
         await client.query(
           "INSERT INTO items (name, image, pdf, description, price, type) VALUES ($1, $2, $3, $4, $5, $6)",
@@ -124,7 +122,7 @@ app.post(
             "pattern",
           ]
         );
-
+        //lägger till patterns men namn image, pdf description, price
         await client.query(
           "INSERT INTO patterns (name, image, pdf, description, price) VALUES ($1, $2, $3, $4,$5) RETURNING *",
           [
@@ -172,49 +170,6 @@ app.post(
     }
   }
 );
-
-//post för att kunna göra ett inlogg och skapa ett token för admin --- det ska bara finnas en admin i denna applikationen
-app.post("/login", async (request, response) => {
-  const { adminName, password } = request.body;
-
-  const { rows } = await client.query("SELECT * FROM admin  WHERE name = $1 ", [
-    adminName,
-  ]);
-
-  //om user inte finns så sändes felmeddelanden
-  if (rows.length === 0) {
-    return response.status(400).send("ingen admin hittad");
-  }
-  const admin = rows[0];
-
-  if (admin.password !== password) {
-    return response.status(401).send("401, Unauthorized");
-  }
-  //tilldelar ett unikt id för Token
-  const token = uuidv4();
-  //lägger till ett nytt token varje gång användaren loggar in
-  await client.query(
-    "INSERT INTO admintoken (admin_id, token) VALUES ($1,$2) RETURNING *",
-    [admin.id, token]
-  );
-  response.status(200).send("inloggning lyckades  ");
-});
-
-app.post("/logout/", async (_request, response) => {
-  try {
-    const { rows } = await client.query("SELECT * FROM admintoken ");
-    const adminToken = rows[0];
-
-    if (adminToken.length === 0) {
-      response.status(401).send("finns ingen användare inloggad");
-    } else {
-      await client.query("DELETE FROM admintoken");
-      response.status(200).send("utloggad, och alla tokens deletade ");
-    }
-  } catch (error) {
-    return response.status(500).send("Internal Server Error");
-  }
-});
 
 //hämtar alla items som finns att köpa
 app.get("/getItems", async (_request, response) => {
@@ -351,19 +306,36 @@ app.get("/shoppingCart", async (request, response) => {
 });
 
 //hämta alla objekt som finns i cart_item och tar info från items
-//uppdatera denna så att den hämtar den varukorgen som hör till sessions_id.
-app.get("/getCartItems", async (_request, response) => {
+//klar 240525
+app.get("/getCartItems", async (request, response) => {
   try {
-    const result = await client.query("SELECT cart_id FROM cart_items");
-    console.log(result.rows);
-    const cartId = result.rows[0].cart_id; // Hämtar cart_id från den första raden, om den finns
+    //här får man den aktiva shoppingcartens sessionsId.
+    const activeCartSessionId = request.query.sessionId;
+    //om det inte finns ett aktivt sessionId
+    if (!activeCartSessionId) {
+      return response.status(400).send({ error: "Session ID måste finnas" });
+    }
+    //hämtar id som finns på cart items
+    const cartResult = await client.query(
+      "SELECT cart_id FROM carts WHERE session_id = $1",
+      [activeCartSessionId]
+    );
+    if (cartResult.rows.length === 0) {
+      return response
+        .status(404)
+        .send({ error: "det finns ingen cart för det satta sessionId" });
+    }
+
+    const cartId = cartResult.rows[0].cart_id; // Hämtar cart_id från den första raden, om den finns
     if (!cartId) {
       throw new Error("Cart ID not found");
     }
+    //hämtar alla cart_items som finns basserat på det cart_idet man har som hämtas via sessionId som skickas via query.
     const { rows } = await client.query(
       "SELECT * FROM items INNER JOIN cart_items ON items.item_id = cart_items.item_id WHERE cart_items.cart_id = $1;",
       [cartId]
     );
+    //mappar ut den itemData
     const itemData = rows.map(
       (items: {
         item_id: number;
@@ -390,7 +362,6 @@ app.get("/getCartItems", async (_request, response) => {
       })
     );
 
-    console.log("vad är detta", rows);
     return response.status(200).send(itemData);
   } catch (error) {
     console.error("Error fetching cart items:", error);
@@ -398,6 +369,48 @@ app.get("/getCartItems", async (_request, response) => {
   }
 });
 
+//post för att kunna göra ett inlogg och skapa ett token för admin --- det ska bara finnas en admin i denna applikationen
+app.post("/login", async (request, response) => {
+  const { adminName, password } = request.body;
+
+  const { rows } = await client.query("SELECT * FROM admin  WHERE name = $1 ", [
+    adminName,
+  ]);
+
+  //om user inte finns så sändes felmeddelanden
+  if (rows.length === 0) {
+    return response.status(400).send("ingen admin hittad");
+  }
+  const admin = rows[0];
+
+  if (admin.password !== password) {
+    return response.status(401).send("401, Unauthorized");
+  }
+  //tilldelar ett unikt id för Token
+  const token = uuidv4();
+  //lägger till ett nytt token varje gång användaren loggar in
+  await client.query(
+    "INSERT INTO admintoken (admin_id, token) VALUES ($1,$2) RETURNING *",
+    [admin.id, token]
+  );
+  response.status(200).send("inloggning lyckades  ");
+});
+
+app.post("/logout/", async (_request, response) => {
+  try {
+    const { rows } = await client.query("SELECT * FROM admintoken ");
+    const adminToken = rows[0];
+
+    if (adminToken.length === 0) {
+      response.status(401).send("finns ingen användare inloggad");
+    } else {
+      await client.query("DELETE FROM admintoken");
+      response.status(200).send("utloggad, och alla tokens deletade ");
+    }
+  } catch (error) {
+    return response.status(500).send("Internal Server Error");
+  }
+});
 app.listen(8080, () => {
   console.log("Webbtjänsten kan nu ta emot anrop.  http://localhost:8080/");
 });

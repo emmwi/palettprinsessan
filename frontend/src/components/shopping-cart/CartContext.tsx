@@ -8,6 +8,7 @@ import {
 } from "react";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
+import { error } from "console";
 
 interface CartItem {
   image: string;
@@ -47,15 +48,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [sessionId, setSessionId] = useState<CartSessions[]>([]);
 
-  //skapar ett localstorage om det inte finns när sidan renderas.
-  // useEffect(() => {
-  //   doesCartExists();
-  // }, []);
-
+  //hämtar om det finns carts.
   useEffect(() => {
     fetchCarts();
-
-    console.log("är arrayen tom? min fetchcarts", sessionId);
   }, []);
 
   //ska jag behålla denna?
@@ -76,18 +71,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       });
   };
 
-  console.log("vad gör session id efter fetchcarts, ", sessionId);
-  // console.log([...sessionId, sessi])
-
   //om det inte finns en cart staras det en och man får ett sessionsid  när man tycker på handlaknappen på patterns eller knitwear
   const doesCartExists = () => {
-    console.log("i början av deosssjs");
+    //  Kollar ifall det finns varor i en varukorg
     if (cartItems.length === 0) {
       let sessionId = localStorage.getItem("sessionId");
       console.log(sessionId);
 
       if (!sessionId) {
-        console.log("hej");
         sessionId = uuidv4();
         localStorage.setItem("sessionId", sessionId);
 
@@ -109,7 +100,15 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   //hämtar det som finns i shoppingcart,
   async function getCartItems() {
     try {
-      const response = await axios.get("http://localhost:8080/getCartItems");
+      //kollar om det finns en cart eller inte
+      const sessionId = doesCartExists();
+      if (!sessionId) {
+        throw new Error("session Id  finns inte");
+      }
+      console.log("session id i get cartitems", sessionId);
+      const response = await axios.get("http://localhost:8080/getCartItems", {
+        params: { sessionId },
+      });
       console.log(response.data);
       setCartItems(response.data);
     } catch (error) {

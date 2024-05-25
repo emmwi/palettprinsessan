@@ -21,21 +21,13 @@ export default function ShoppingCart() {
     clearCart,
     removeFromCart,
     getCartTotal,
+    getCartItems,
   } = useCartContext();
 
   useEffect(() => {
     getCartItems();
+    console.log("här har vi kört get cart items");
   }, []);
-
-  async function getCartItems() {
-    try {
-      const response = await axios.get("http://localhost:8080/getCartItems");
-      console.log(response.data);
-      setCartItems(response.data);
-    } catch (error) {
-      console.error("Error adding item to cart:", error);
-    }
-  }
 
   return (
     <>
