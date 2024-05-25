@@ -351,9 +351,11 @@ app.get("/shoppingCart", async (request, response) => {
 });
 
 //hämta alla objekt som finns i cart_item och tar info från items
+//uppdatera denna så att den hämtar den varukorgen som hör till sessions_id.
 app.get("/getCartItems", async (_request, response) => {
   try {
     const result = await client.query("SELECT cart_id FROM cart_items");
+    console.log(result.rows);
     const cartId = result.rows[0].cart_id; // Hämtar cart_id från den första raden, om den finns
     if (!cartId) {
       throw new Error("Cart ID not found");

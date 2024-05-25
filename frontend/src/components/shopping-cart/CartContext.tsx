@@ -30,6 +30,7 @@ interface CartContextProps {
   clearCart: () => void;
   getCartTotal: () => number;
   doesCartExists: () => void;
+  getCartItems: () => void;
 }
 
 const CartContext = createContext<CartContextProps | undefined>(undefined);
@@ -46,17 +47,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [sessionId, setSessionId] = useState<CartSessions[]>([]);
 
-  useEffect(() => {
-    doesCartExists();
-  }, []);
-  useEffect(() => {
-    fetchCartItem();
+  //skapar ett localstorage om det inte finns när sidan renderas.
+  // useEffect(() => {
+  //   doesCartExists();
+  // }, []);
 
-    console.log("är arrayen tom? min cartitems", cartItems);
+  useEffect(() => {
+    fetchCarts();
+
+    console.log("är arrayen tom? min fetchcarts", sessionId);
   }, []);
 
   //ska jag behålla denna?
-  const fetchCartItem = () => {
+  const fetchCarts = () => {
     fetch("http://localhost:8080/shoppingCart")
       .then((response) => {
         if (!response.ok) {
@@ -73,6 +76,46 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       });
   };
 
+  console.log("vad gör session id efter fetchcarts, ", sessionId);
+  // console.log([...sessionId, sessi])
+
+  //om det inte finns en cart staras det en och man får ett sessionsid  när man tycker på handlaknappen på patterns eller knitwear
+  const doesCartExists = () => {
+    console.log("i början av deosssjs");
+    if (cartItems.length === 0) {
+      let sessionId = localStorage.getItem("sessionId");
+      console.log(sessionId);
+
+      if (!sessionId) {
+        console.log("hej");
+        sessionId = uuidv4();
+        localStorage.setItem("sessionId", sessionId);
+
+        fetch("http://localhost:8080/createSessionAndCart", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ sessionId }),
+        }).catch((error) => {
+          console.error("Error starting session and creating cart:", error);
+        });
+      }
+      return sessionId;
+    } else {
+      return localStorage.getItem("sessionId");
+    }
+  };
+  //hämtar det som finns i shoppingcart,
+  async function getCartItems() {
+    try {
+      const response = await axios.get("http://localhost:8080/getCartItems");
+      console.log(response.data);
+      setCartItems(response.data);
+    } catch (error) {
+      console.error("Error adding item to cart:", error);
+    }
+  }
   //Lägga till i shoppingCart
   const addToCart = (item: CartItem) => {
     const isItemInCart = cartItems.find((cartItem) => {
@@ -161,35 +204,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }, 0);
   };
 
-  //om det inte finns en cart staras det en och man får ett sessionsid  när man tycker på handlaknappen på patterns eller knitwear
-
-  const doesCartExists = () => {
-    console.log("i början av deosssjs");
-    if (cartItems.length === 0) {
-      let sessionId = localStorage.getItem("sessionId");
-      console.log(sessionId);
-
-      if (!sessionId) {
-        console.log("hej");
-        sessionId = uuidv4();
-        localStorage.setItem("sessionId", sessionId);
-
-        fetch("http://localhost:8080/createSessionAndCart", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ sessionId }),
-        }).catch((error) => {
-          console.error("Error starting session and creating cart:", error);
-        });
-      }
-      return sessionId;
-    } else {
-      return localStorage.getItem("sessionId");
-    }
-  };
-
   return (
     <CartContext.Provider
       value={{
@@ -200,6 +214,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         clearCart,
         getCartTotal,
         doesCartExists,
+        getCartItems,
       }}
     >
       {children}
