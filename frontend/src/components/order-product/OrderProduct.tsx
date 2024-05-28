@@ -1,7 +1,7 @@
 "use client";
 import { Key, useEffect, useState } from "react";
 import { useCartContext } from "../shopping-cart/CartContext";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import {
@@ -14,8 +14,7 @@ import {
 } from "../general-css/GeneralStyles";
 
 export default function OrderProduct() {
-  const { cartItems, addToCart, doesCartExists, getCartItems } =
-    useCartContext();
+  const { cartItems, addToCart, doesCartExists, outOfStock } = useCartContext();
   console.log("cartcontext hittas");
   const [items, setItem] = useState([]);
 
@@ -44,6 +43,7 @@ export default function OrderProduct() {
     description: string;
     image: string;
     price: number;
+    type: string;
   }) => {
     addToCart({
       item_id: clickedItem.item_id as number,
@@ -51,27 +51,10 @@ export default function OrderProduct() {
       name: clickedItem.name,
       price: clickedItem.price,
       quantity: 1,
+      type: clickedItem.type,
     });
 
     doesCartExists();
-    toast(`${clickedItem.name} finns nu varukorgen!`, {
-      position: "top-center",
-      autoClose: 2000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      theme: "light",
-      style: {
-        backgroundColor: "",
-        color: "#000",
-        border: "1px solid #4CAF50",
-        borderRadius: "8px",
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-        padding: "16px",
-        fontSize: "16px",
-      },
-    });
   };
 
   return (
@@ -87,6 +70,7 @@ export default function OrderProduct() {
               description: string;
               image: string;
               price: number;
+              type: string;
             }) => (
               <Card key={item.item_id}>
                 <h2>{item.name}</h2>
@@ -96,13 +80,8 @@ export default function OrderProduct() {
                 />
                 <Info>{item.description},</Info>
                 <Price>{item.price} kr</Price>
-                {/*
-                <OderButton
-                  type="button"
-                  value="Handla"
-                  onClick={() => handleClick(item)}
-                /> */}
-                {!cartItems.some(
+                {/* avvaktiverar knappen och ändrar den till 'slut i lager' om det item man klickar på har samma id som något av de items som finns i cartitems eller outofstock */}
+                {![...cartItems, ...outOfStock].find(
                   (cartItem) => cartItem.item_id === item.item_id
                 ) ? (
                   <OderButton
@@ -111,11 +90,7 @@ export default function OrderProduct() {
                     onClick={() => handleClick(item)}
                   />
                 ) : (
-                  <OderButton
-                    type="button"
-                    value="Tillagd i varukorgen"
-                    disabled
-                  />
+                  <OderButton type="button" value="Slut i lager" disabled />
                 )}
               </Card>
             )

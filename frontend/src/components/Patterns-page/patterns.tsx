@@ -2,7 +2,7 @@
 import { useCartContext } from "../shopping-cart/CartContext";
 import axios from "axios";
 import { Key, useEffect, useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
   Card,
@@ -14,7 +14,7 @@ import {
 } from "../general-css/GeneralStyles";
 
 export default function PatternContent() {
-  const { cartItems, addToCart, doesCartExists } = useCartContext();
+  const { addToCart, doesCartExists } = useCartContext();
   console.log("cartcontext hittas");
 
   const [items, setItem] = useState([]);
@@ -44,6 +44,7 @@ export default function PatternContent() {
     description: string;
     image: string;
     price: number;
+    type: string;
   }) => {
     addToCart({
       item_id: clickedItem.item_id as number,
@@ -51,26 +52,9 @@ export default function PatternContent() {
       name: clickedItem.name,
       price: clickedItem.price,
       quantity: 1,
+      type: clickedItem.type,
     });
     doesCartExists();
-    toast(`${clickedItem.name} finns nu i varukorgen!`, {
-      position: "top-center",
-      autoClose: 2000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      theme: "light",
-      style: {
-        backgroundColor: "",
-        color: "#000",
-        border: "1px solid #4CAF50",
-        borderRadius: "8px",
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-        padding: "16px",
-        fontSize: "16px",
-      },
-    });
   };
 
   return (
@@ -86,6 +70,7 @@ export default function PatternContent() {
               description: string;
               image: string;
               price: number;
+              type: string;
             }) => (
               <Card key={item.item_id}>
                 <h2>{item.name}</h2>

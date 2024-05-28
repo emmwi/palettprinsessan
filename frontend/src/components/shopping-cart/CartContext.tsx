@@ -8,7 +8,8 @@ import {
 } from "react";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-import { error } from "console";
+
+import { toast } from "react-toastify";
 
 interface CartItem {
   image: string;
@@ -16,6 +17,7 @@ interface CartItem {
   price: number;
   quantity: number;
   item_id: number;
+  type: string;
 }
 
 interface CartSessions {
@@ -28,10 +30,10 @@ interface CartContextProps {
   setCartItems: (items: CartItem[]) => void;
   addToCart: (item: CartItem) => void;
   removeFromCart: (item: CartItem) => void;
-  clearCart: () => void;
   getCartTotal: () => number;
   doesCartExists: () => void;
   getCartItems: () => void;
+  outOfStock: CartItem[];
 }
 
 const CartContext = createContext<CartContextProps | undefined>(undefined);
@@ -46,25 +48,12 @@ export const useCartContext = () => {
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  // const [sessionId, setSessionId] = useState<CartSessions[]>([]); tar troligen bort detta också
+  const [outOfStock, setOutOfStock] = useState<CartItem[]>([]);
 
-  //ska jag behålla denna, tar troligen bort denna?
-  // const fetchCarts = () => {
-  //   fetch("http://localhost:8080/shoppingCart")
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         throw new Error("Network response was not ok");
-  //       }
-  //       return response.json();
-  //     })
-  //     .then((data) => {
-  //       console.log("data från fetchcartitem", data);
-  //       setSessionId(data);
-  //     })
-  //     .catch((error) => {
-  //       console.error("There was a problem fetching the cart:", error);
-  //     });
-  // };
+  //hämtar carten direkt när man renderar sidan
+  useEffect(() => {
+    getCartItems();
+  }, []);
 
   //klar 20240525
   const doesCartExists = () => {
@@ -109,7 +98,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
-  //Lägga till i shoppingCart - be om hjälp på denna
+  //Lägga till i shoppingCart - be om hjälp på denna klar 20240528
   const addToCart = (item: CartItem) => {
     //kollar om varan finns i varukorgen eller inte
     const isItemInCart = cartItems.find((cartItem) => {
@@ -118,8 +107,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     //tilldelar sessionId till det som finns när man kör doesCartExists
     const sessionId: string | undefined | null = doesCartExists();
     //om item inte finns i cart läggs den till i newCartItem
-    if (!isItemInCart) {
-      // const newCartItem = { ...item, quantity: 1, sessionId };
+    if (!isItemInCart || item.type === "pattern") {
       //kör en post med newCartItem till backend och därefter uppdateras det på frontend med setCartItems
       axios
         .post("http://localhost:8080/addToCart", {
@@ -130,58 +118,54 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         .then((response) => {
           console.log("AddToCart response", response.data);
           setCartItems([...cartItems, response.data]);
+          //lägger in toast här för att ge användaren info om varan är tillgänlig att köpa eller ej. man lan "paxa" varor i denna applikation
+          toast(`${item.name} finns nu varukorgen!`, {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            theme: "light",
+            style: {
+              backgroundColor: "",
+              color: "#000",
+              border: "1px solid #4CAF50",
+              borderRadius: "8px",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+              padding: "16px",
+              fontSize: "16px",
+            },
+          });
         })
 
         .catch((error) => {
-          console.error("Error adding item to cart:", error);
+          //om man får ett error ska meddelande sättas och skrivas ut
+          if (error.response) {
+            setOutOfStock([...outOfStock, item]);
+            //toast för när varan inte finns tillgänlig
+            toast(`${item.name} är inte tillgänglig för köp!`, {
+              position: "top-center",
+              autoClose: 2000,
+              hideProgressBar: true,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              theme: "light",
+              style: {
+                backgroundColor: "",
+                color: "#ef0d0d",
+                border: "1px solid #f60b0b",
+                borderRadius: "8px",
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                padding: "16px",
+                fontSize: "16px",
+              },
+            });
+          } else console.error("Error adding item to cart:", error);
         });
     }
-    //för att kunna lägga till flera varor
-    // else {
-    //   const updatedCartItems = cartItems.map((cartItem) =>
-    //     cartItem.item_id === item.item_id
-    //       ? { ...cartItem, quantity: cartItem.quantity + 1 }
-    //       : cartItem
-    //   );
-    //   setCartItems(updatedCartItems);
-    // }
   };
-
-  // Funkar inte, be om hjälp
-  // const addToCart = (item: CartItem) => {
-  //   //kollar om varan finns i varukorgen eller inte
-  //   const isItemInCart = cartItems.find((cartItem) => {
-  //     return cartItem.item_id === item.item_id;
-  //   });
-  //   //tilldelar sessionId till det som finns när man kör doesCartExists
-  //   const sessionId: string | undefined | null = doesCartExists();
-  //   //om item  finns i cart läggs den till i updatedCartimes
-  //   if (isItemInCart) {
-  //     const updatedCartItems = cartItems.map((cartItem) =>
-  //       cartItem.item_id === item.item_id
-  //         ? { ...cartItem, quantity: cartItem.quantity + 1 }
-  //         : cartItem
-  //     );
-  //     setCartItems(updatedCartItems);
-  //   } else {
-  //     // const newCartItem = { ...item, quantity: 1, sessionId };
-  //     //kör en post med newCartItem till backend och därefter uppdateras det på frontend med setCartItems
-  //     axios
-  //       .post("http://localhost:8080/addToCart", {
-  //         ...item,
-  //         quantity: 1,
-  //         sessionId,
-  //       })
-  //       .then((response) => {
-  //         console.log("AddToCart response", response.data);
-  //         setCartItems([...cartItems, response.data]);
-  //       })
-
-  //       .catch((error) => {
-  //         console.error("Error adding item to cart:", error);
-  //       });
-  //   }
-  // };
 
   const removeFromCart = (item: CartItem) => {
     //filtererar items för att hitta det som ska tas bort
@@ -205,10 +189,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       });
   };
 
-  const clearCart = () => {
-    setCartItems([]);
-  };
-
   //ger rätt summa för allt man köpt.
   const getCartTotal = () => {
     return cartItems.reduce((total, item) => {
@@ -225,10 +205,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         cartItems,
         addToCart,
         removeFromCart,
-        clearCart,
         getCartTotal,
         doesCartExists,
         getCartItems,
+        outOfStock,
       }}
     >
       {children}

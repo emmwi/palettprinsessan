@@ -1,27 +1,12 @@
 "use client";
 import { RiDeleteBin5Line } from "react-icons/ri";
 import { useCartContext } from "./CartContext";
-import {
-  Card,
-  Img,
-  Container,
-  Info,
-  OderButton,
-  Price,
-} from "../general-css/GeneralStyles";
+import { Card, Img, Container } from "../general-css/GeneralStyles";
 import { useEffect } from "react";
 
 export default function ShoppingCart() {
-  const {
-    cartItems,
-    setCartItems,
-    addToCart,
-    doesCartExists,
-    clearCart,
-    removeFromCart,
-    getCartTotal,
-    getCartItems,
-  } = useCartContext();
+  const { cartItems, removeFromCart, getCartTotal, getCartItems } =
+    useCartContext();
 
   useEffect(() => {
     getCartItems();

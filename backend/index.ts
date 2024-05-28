@@ -1,13 +1,13 @@
 import cors from "cors";
 import * as dotenv from "dotenv";
 import { Client } from "pg";
-import express, { response } from "express";
-import { request } from "http";
+import express from "express";
+// import { request } from "http";
 import path from "path";
 import multer from "multer";
-import { fileURLToPath } from "url";
+// import { fileURLToPath } from "url";
 import { v4 as uuidv4 } from "uuid";
-import { constants } from "buffer";
+// import { constants } from "buffer";
 __dirname = path.dirname(__filename);
 
 const app = express();
@@ -123,17 +123,7 @@ app.post(
             "pattern",
           ]
         );
-        //lägger till patterns men namn image, pdf description, price
-        await client.query(
-          "INSERT INTO patterns (name, image, pdf, description, price) VALUES ($1, $2, $3, $4,$5) RETURNING *",
-          [
-            name,
-            (request.files as unknown as Fields).image[0].filename,
-            (request.files as unknown as Fields).pdf[0].filename,
-            description,
-            price,
-          ]
-        );
+
         response.status(201).send("projekt uppladdat");
       }
       response.status(200).send();
@@ -159,10 +149,7 @@ app.post(
           "INSERT INTO items (name, image, price, description, type) VALUES ($1, $2, $3, $4, $5)",
           [name, request.file.filename, price, description, "knitwear"]
         );
-        await client.query(
-          "INSERT INTO knitwear (name, image, price, description) VALUES ($1, $2, $3, $4) RETURNING *",
-          [name, request.file.filename, price, description]
-        );
+
         response.status(201).send("projekt uppladdat");
       }
     } catch (error) {
@@ -215,32 +202,57 @@ app.post("/createSessionAndCart", async (request, response) => {
 
 //lägga in saker i cart
 app.post("/addToCart", async (request, response) => {
-  const { sessionId, quantity, item_id } = request.body;
+  const { sessionId, quantity, item_id, type } = request.body;
   console.log("Request body:", request.body);
   console.log("sessionId:", sessionId);
   console.log("quantity:", quantity);
   console.log("item_id:", item_id);
+  console.log("item type", type);
   try {
     const { rows } = await client.query(
       "select * from carts where session_id = $1",
       [sessionId]
     );
-    // console.log(rows);
+
     if (rows.length !== 0) {
       const cart_id = rows[0].cart_id;
       console.log("itemid", item_id);
       console.log("cartid", cart_id);
+
+      //om det finns några varor med type knitwear som man försökt lägga till så kollar den i allt som finns i cart_items och items om den varan redan ligger i en annan cart.
+      if (type === "knitwear") {
+        //jointable som hämtar all information från cart_items, kollar i items och i cart_items om på item_id matchar- att samma item_id finns i båda tabellerna. Om item_id finns i båda tabllerna OCH item är av typen "knitwear" så hämtas dessa items och sparas i knitWearItem. -- kollar om cart_item innehåller
+        const knitWearItem = await client.query(
+          "SELECT * FROM cart_items JOIN items ON cart_items.item_id = items.item_id WHERE items.type = 'knitwear' AND cart_items.item_id = $1",
+          [item_id]
+        );
+        //om varan ligger i en annan cart så får man ett meddelande om att varan är slut i lager.
+        console.log(
+          "börja med knitwerarconsole",
+          knitWearItem.rows[0],
+          "vad gör knitwearitem"
+        );
+        if (knitWearItem.rows.length > 0) {
+          return response.status(418).send({
+            message: "varan är slut i lager.",
+            item: knitWearItem.rows[0],
+          });
+        }
+      }
       const existingItem = await client.query(
         "SELECT * FROM cart_items WHERE cart_id = $1 AND item_id = $2",
         [cart_id, item_id]
       );
 
-      console.log("existing item i add to cart", existingItem.rows.length);
-      if (existingItem.rows.length === 0) {
+      console.log("existing item in add to cart", existingItem.rows.length);
+      console.log(rows[0].type);
+      console.log(type);
+      if (existingItem.rows.length === 0 || type === "pattern") {
         const result = await client.query(
           "INSERT INTO cart_items ( cart_id, item_id, quantity) VALUES ($1, $2, $3) RETURNING *",
           [cart_id, item_id, quantity]
         );
+
         response.status(201).send(result.rows[0]);
       } else {
         response
