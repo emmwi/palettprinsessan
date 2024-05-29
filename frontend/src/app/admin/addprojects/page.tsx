@@ -8,27 +8,68 @@ import {
   AdminContainer,
   AdminForm,
 } from "../../../components/admin/Admin-Syles/AdminStyles";
+import { FormEvent, useState } from "react";
+
 export default function AddProject() {
+  const [name, setName] = useState("");
+  const [image, setImage] = useState<File | null>(null);
+  const [description, setDescription] = useState("");
+
+  //funktion för att förhindra att man skickas till backend med submit
+  const handleSumbit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    try {
+      const response = await fetch("http://localhost:8080/project", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("AddProject response not ok ");
+      }
+
+      setName("");
+      setImage(null);
+      setDescription("");
+      alert("produkt uppladdad");
+    } catch (error) {
+      console.log("error i addproject", error);
+    }
+  };
+
   return (
     <>
       <AdminContainer>
         <AdminCard>
           <h2>Lägg till projekt</h2>
           <AdminForm
-            action="http://localhost:8080/project"
-            method="post"
+            // action="http://localhost:8080/project"
+            // method="post"
             encType="multipart/form-data"
-            // onSubmit={(e) => {
-            //   e.preventDefault();
-            // }}
+            onSubmit={handleSumbit}
           >
             <label>Namn</label>
-            <TextInput type="input" name="name" />
+            <TextInput
+              type="input"
+              name="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
             <label>Bild:</label>
-            <UpploadButton type="file" accept="image/*" name="image" />
+            <UpploadButton
+              type="file"
+              accept="image/*"
+              name="image"
+              onChange={(e) =>
+                setImage(e.target.files ? e.target.files[0] : null)
+              }
+            />
             <label>Beskrivning</label>
             <DescriptionTextArea
               name="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               placeholder="Beskrivning..."
             />
 
