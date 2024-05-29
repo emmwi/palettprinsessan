@@ -1,12 +1,13 @@
 import cors from "cors";
 import * as dotenv from "dotenv";
 import { Client } from "pg";
-import express from "express";
+import express, { response } from "express";
 // import { request } from "http";
 import path from "path";
 import multer from "multer";
 // import { fileURLToPath } from "url";
 import { v4 as uuidv4 } from "uuid";
+import { request } from "http";
 // import { constants } from "buffer";
 __dirname = path.dirname(__filename);
 
@@ -64,100 +65,6 @@ app.get("/projects", async (_request, response) => {
   );
   return response.send(projectData);
 });
-
-//lägga till nya projekt
-app.post("/project", upload.single("image"), async (request, response) => {
-  try {
-    const name = request.body.name;
-    const description = request.body.description;
-    if (request.file !== undefined) {
-      console.log(request.file);
-      response.status(201).send("projekt uppladdat");
-      await client.query(
-        "INSERT INTO projects (name, image, description) VALUES ($1, $2, $3) RETURNING *",
-        [name, request.file.filename, description]
-      );
-    }
-  } catch (error) {
-    console.error(error);
-    response.status(500).json({ error: "Error adding project" });
-  }
-});
-
-//lägga till nya mönster
-interface Fields {
-  image: FieldObject[];
-  pdf: FieldObject[];
-}
-interface FieldObject {
-  fieldname: string;
-  originalname: string;
-  encoding: string;
-  mimetype: string;
-  destination: string;
-  filename: string;
-  path: string;
-  size: number;
-}
-app.post(
-  "/patterns",
-  uploadPattern.fields([{ name: "image" }, { name: "pdf" }]),
-
-  async (request, response) => {
-    try {
-      const name = request.body.name;
-      const description = request.body.description;
-      const price = request.body.price;
-
-      console.log(request.files);
-      if (request.files !== undefined) {
-        //lägga in samma sak i items-tabellen också så att de kan nås i cart
-        await client.query(
-          "INSERT INTO items (name, image, pdf, description, price, type) VALUES ($1, $2, $3, $4, $5, $6)",
-          [
-            name,
-            (request.files as unknown as Fields).image[0].filename,
-            (request.files as unknown as Fields).pdf[0].filename,
-            description,
-            price,
-            "pattern",
-          ]
-        );
-
-        response.status(201).send("projekt uppladdat");
-      }
-      response.status(200).send();
-    } catch (error) {
-      console.error(error);
-      response.status(500).json({ error: "Error adding pattern" });
-    }
-  }
-);
-
-//lögga till stickade plagg
-app.post(
-  "/knitwear",
-  uploadKnitwear.single("image"),
-  async (request, response) => {
-    try {
-      const name = request.body.name;
-      const description = request.body.description;
-      const price = request.body.price;
-      if (request.file !== undefined) {
-        //lägga in samma sak i items-tabellen också så att de kan nås i cart
-        await client.query(
-          "INSERT INTO items (name, image, price, description, type) VALUES ($1, $2, $3, $4, $5)",
-          [name, request.file.filename, price, description, "knitwear"]
-        );
-
-        response.status(201).send("projekt uppladdat");
-      }
-    } catch (error) {
-      console.error(error);
-      response.status(500).json({ error: "Error adding knitwear" });
-    }
-  }
-);
 
 //hämtar alla items som finns att köpa
 app.get("/getItems", async (_request, response) => {
@@ -419,6 +326,136 @@ app.post("/logout/", async (_request, response) => {
     return response.status(500).send("Internal Server Error");
   }
 });
+
+interface Fields {
+  image: FieldObject[];
+  pdf: FieldObject[];
+}
+interface FieldObject {
+  fieldname: string;
+  originalname: string;
+  encoding: string;
+  mimetype: string;
+  destination: string;
+  filename: string;
+  path: string;
+  size: number;
+}
+//lögga till stickade plagg
+app.post(
+  "/knitwear",
+  uploadKnitwear.single("image"),
+  async (request, response) => {
+    try {
+      const name = request.body.name;
+      const description = request.body.description;
+      const price = request.body.price;
+      if (request.file !== undefined) {
+        //lägga in samma sak i items-tabellen också så att de kan nås i cart
+        await client.query(
+          "INSERT INTO items (name, image, price, description, type) VALUES ($1, $2, $3, $4, $5)",
+          [name, request.file.filename, price, description, "knitwear"]
+        );
+
+        response.status(201).send("projekt uppladdat");
+      }
+    } catch (error) {
+      console.error(error);
+      response.status(500).json({ error: "Error adding knitwear" });
+    }
+  }
+);
+//lägga till nya mönster
+app.post(
+  "/patterns",
+  uploadPattern.fields([{ name: "image" }, { name: "pdf" }]),
+
+  async (request, response) => {
+    try {
+      const name = request.body.name;
+      const description = request.body.description;
+      const price = request.body.price;
+
+      console.log(request.files);
+      if (request.files !== undefined) {
+        //lägga in samma sak i items-tabellen också så att de kan nås i cart
+        await client.query(
+          "INSERT INTO items (name, image, pdf, description, price, type) VALUES ($1, $2, $3, $4, $5, $6)",
+          [
+            name,
+            (request.files as unknown as Fields).image[0].filename,
+            (request.files as unknown as Fields).pdf[0].filename,
+            description,
+            price,
+            "pattern",
+          ]
+        );
+
+        response.status(201).send("projekt uppladdat");
+      }
+      response.status(200).send();
+    } catch (error) {
+      console.error(error);
+      response.status(500).json({ error: "Error adding pattern" });
+    }
+  }
+);
+//lägga till nya projekt
+app.post("/project", upload.single("image"), async (request, response) => {
+  try {
+    const name = request.body.name;
+    const description = request.body.description;
+    if (request.file !== undefined) {
+      console.log(request.file);
+      response.status(201).send("projekt uppladdat");
+      await client.query(
+        "INSERT INTO projects (name, image, description) VALUES ($1, $2, $3) RETURNING *",
+        [name, request.file.filename, description]
+      );
+    }
+  } catch (error) {
+    console.error(error);
+    response.status(500).json({ error: "Error adding project" });
+  }
+});
+
+//delete från admin sidan så att jag kan ta bort projekt från databasen via frontend
+app.post("/adminDeleteProjects", async (request, response) => {
+  try {
+    const { project_id } = request.body;
+    // const {rows} =
+    await client.query("DELETE FROM projects WHERE project_id =$1", [
+      project_id,
+    ]);
+    response
+      .status(200)
+      .send({ message: "projektet är borttagen från databasen " });
+  } catch (error) {
+    response
+      .status(400)
+      .send("det fgick inte att ta bort projekt från backend(databasen");
+  }
+});
+
+//delete från admin sidan så att jag kan ta bort produkter från databasen via frontend
+app.post("/adminDeleteItems", async (request, response) => {
+  try {
+    const { item_id } = request.body;
+    console.log(item_id, "itemid i admindelteitems");
+    if (!item_id) {
+      throw new Error("ogiltlig item_id");
+    }
+    await client.query("DELETE FROM items WHERE item_id =$1", [item_id]);
+    response
+      .status(200)
+      .send({ message: "varan är borttagen från databasen " });
+  } catch (error) {
+    response
+      .status(400)
+      .send("det fgick inte att ta bort items från backend(databasen");
+  }
+});
+
 app.listen(8080, () => {
   console.log("Webbtjänsten kan nu ta emot anrop.  http://localhost:8080/");
 });
