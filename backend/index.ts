@@ -79,6 +79,7 @@ app.get("/getItems", async (_request, response) => {
         image: string;
         price: Number;
         type: string;
+        pdf: string;
       }) => ({
         item_id: items.item_id,
         name: items.name,
@@ -89,6 +90,7 @@ app.get("/getItems", async (_request, response) => {
             : `/uploads/patternsPDF/${items.image}`,
         price: items.price,
         type: items.type,
+        pdf: `/uploads/patternsPDF/${items.pdf}`,
       })
     );
     response.status(200).send(itemData);

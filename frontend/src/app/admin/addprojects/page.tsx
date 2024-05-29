@@ -12,7 +12,6 @@ import { FormEvent, useState } from "react";
 
 export default function AddProject() {
   const [name, setName] = useState("");
-  const [image, setImage] = useState<File | null>(null);
   const [description, setDescription] = useState("");
 
   //funktion för att förhindra att man skickas till backend med submit
@@ -30,7 +29,6 @@ export default function AddProject() {
       }
 
       setName("");
-      setImage(null);
       setDescription("");
       alert("produkt uppladdad");
     } catch (error) {
@@ -57,14 +55,7 @@ export default function AddProject() {
               onChange={(e) => setName(e.target.value)}
             />
             <label>Bild:</label>
-            <UpploadButton
-              type="file"
-              accept="image/*"
-              name="image"
-              onChange={(e) =>
-                setImage(e.target.files ? e.target.files[0] : null)
-              }
-            />
+            <UpploadButton type="file" accept="image/*" name="image" />
             <label>Beskrivning</label>
             <DescriptionTextArea
               name="description"

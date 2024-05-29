@@ -74,6 +74,7 @@ export default function ViewProducts() {
               image: string;
               price: number;
               type: string;
+              pdf: string;
             }) => (
               <Card key={item.item_id}>
                 <h2>Namn: {item.name}</h2>
@@ -84,6 +85,12 @@ export default function ViewProducts() {
                 <Info>Sort: {item.type}</Info>
                 <Info>Beskrivning: {item.description}</Info>
                 <Price>Pris: {item.price} kr</Price>
+                {/* <embed
+                  src={`http://localhost:8080${item.pdf}`}
+                  type="application/pdf"
+                  width="100%"
+                  height="600px"
+                /> */}
 
                 <OderButton
                   type="button"
