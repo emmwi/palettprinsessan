@@ -5,12 +5,18 @@ import express from "express";
 import path from "path";
 import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
-// import { request } from "http";
+import {
+  Project,
+  Item,
+  Fields,
+  RequestBody,
+  CartItem,
+  Carts,
+} from "./backendTypes/types";
+import { UUID } from "crypto";
 __dirname = path.dirname(__filename);
-import { Project, Item, Fields } from "./backendTypes/types";
 
 const app = express();
-
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -29,11 +35,10 @@ app.use(
   express.static(path.join(__dirname, "uploads", "knitwear"))
 );
 dotenv.config();
-
+//connection med databasen
 const client = new Client({
   connectionString: process.env.PGURI,
 });
-
 client.connect();
 
 //visar vilken mapp man ska lägga uppladdning av bilder/pdf
@@ -60,7 +65,7 @@ app.get("/projects", async (_request, response) => {
 //hämtar alla items som finns att köpa
 app.get("/getItems", async (_request, response) => {
   try {
-    const { rows } = await client.query("SELECT * FROM items");
+    const { rows } = await client.query<Item>("SELECT * FROM items");
 
     const itemData = rows.map((items: Item) => ({
       item_id: items.item_id,
@@ -82,19 +87,20 @@ app.get("/getItems", async (_request, response) => {
 
 //lägger till ett sessionID i cart
 app.post("/createSessionAndCart", async (request, response) => {
-  const { sessionId } = request.body;
+  const { sessionId }: RequestBody = request.body;
 
-  await client.query("INSERT INTO carts (session_id) VALUES ($1) RETURNING *", [
-    sessionId,
-  ]);
+  await client.query<Carts>(
+    "INSERT INTO carts (session_id) VALUES ($1) RETURNING *",
+    [sessionId]
+  );
   response.status(201).send("ny session skapad");
 });
 
 //lägga in saker i cart
 app.post("/addToCart", async (request, response) => {
-  const { sessionId, quantity, item_id, type } = request.body;
+  const { sessionId, quantity, item_id, type }: RequestBody = request.body;
   try {
-    const { rows } = await client.query(
+    const { rows } = await client.query<Carts>(
       "select * from carts where session_id = $1",
       [sessionId]
     );
@@ -118,13 +124,13 @@ app.post("/addToCart", async (request, response) => {
           });
         }
       }
-      const existingItem = await client.query(
+      const existingItem = await client.query<CartItem>(
         "SELECT * FROM cart_items WHERE cart_id = $1 AND item_id = $2",
         [cart_id, item_id]
       );
 
       if (existingItem.rows.length === 0 || type === "pattern") {
-        const result = await client.query(
+        const result = await client.query<CartItem>(
           "INSERT INTO cart_items ( cart_id, item_id, quantity) VALUES ($1, $2, $3) RETURNING *",
           [cart_id, item_id, quantity]
         );
@@ -146,7 +152,7 @@ app.post("/addToCart", async (request, response) => {
 
 //deleta om man tar bort saker från cart
 app.post("/deleteItemFromCart", async (request, response) => {
-  const { item_id, sessionId } = request.body;
+  const { item_id, sessionId }: RequestBody = request.body;
 
   // Steg 1: Kontrollera om både item_id och sessionId finns
   if (!item_id || !sessionId) {
@@ -154,14 +160,14 @@ app.post("/deleteItemFromCart", async (request, response) => {
   }
   try {
     //hämtar cart_id i carts för att kunna använda senare
-    const result = await client.query(
+    const result = await client.query<Carts>(
       "SELECT cart_id FROM carts WHERE session_id = $1",
       [sessionId]
     );
     //hämtar rätt cart_id basserat på sessionId
     const cart_id = result.rows[0].cart_id;
 
-    const { rows } = await client.query(
+    const { rows } = await client.query<CartItem>(
       "SELECT item_id FROM cart_items WHERE item_id = $1",
       [item_id]
     );
@@ -177,7 +183,7 @@ app.post("/deleteItemFromCart", async (request, response) => {
     }
 
     //tar bort cart_item som passar item_id och cart_id
-    await client.query(
+    await client.query<CartItem>(
       "DELETE FROM cart_items WHERE item_id = $1 AND cart_id = $2",
       [item_id, cart_id]
     );
@@ -199,7 +205,7 @@ app.get("/getCartItems", async (request, response) => {
       return response.status(400).send({ error: "Session ID måste finnas" });
     }
     //hämtar id som finns på cart items
-    const cartResult = await client.query(
+    const cartResult = await client.query<Carts>(
       "SELECT cart_id FROM carts WHERE session_id = $1",
       [activeCartSessionId]
     );
@@ -209,7 +215,7 @@ app.get("/getCartItems", async (request, response) => {
         .send({ error: "det finns ingen cart för det satta sessionId" });
     }
 
-    const cartId = cartResult.rows[0].cart_id; // Hämtar cart_id från den första raden, om den finns
+    const cartId: number = cartResult.rows[0].cart_id; // Hämtar cart_id från den första raden, om den finns
     if (!cartId) {
       throw new Error("Cart ID not found");
     }
@@ -243,7 +249,7 @@ app.get("/getCartItems", async (request, response) => {
 
 //post för att kunna göra ett inlogg och skapa ett token för admin --- det ska bara finnas en admin i denna applikationen
 app.post("/login", async (request, response) => {
-  const { adminName, password } = request.body;
+  const { adminName, password }: RequestBody = request.body;
 
   const { rows } = await client.query("SELECT * FROM admin  WHERE name = $1 ", [
     adminName,
@@ -271,7 +277,7 @@ app.post("/login", async (request, response) => {
 app.post("/logout/", async (_request, response) => {
   try {
     const { rows } = await client.query("SELECT * FROM admintoken ");
-    const adminToken = rows[0];
+    const adminToken: string = rows[0];
 
     if (adminToken.length === 0) {
       response.status(401).send("finns ingen användare inloggad");
@@ -290,9 +296,8 @@ app.post(
   uploadKnitwear.single("image"),
   async (request, response) => {
     try {
-      const name = request.body.name;
-      const description = request.body.description;
-      const price = request.body.price;
+      const { name, description, price }: RequestBody = request.body;
+
       if (request.file !== undefined) {
         //lägga in samma sak i items-tabellen också så att de kan nås i cart
         await client.query(
@@ -315,9 +320,8 @@ app.post(
 
   async (request, response) => {
     try {
-      const name = request.body.name;
-      const description = request.body.description;
-      const price = request.body.price;
+      const { name, description, price }: RequestBody = request.body;
+
       if (request.files !== undefined) {
         //lägga in samma sak i items-tabellen också så att de kan nås i cart
         await client.query(
@@ -344,8 +348,8 @@ app.post(
 //lägga till nya projekt
 app.post("/project", upload.single("image"), async (request, response) => {
   try {
-    const name = request.body.name;
-    const description = request.body.description;
+    const { name, description }: RequestBody = request.body;
+
     if (request.file !== undefined) {
       response.status(201).send("projekt uppladdat");
       await client.query(
@@ -362,7 +366,7 @@ app.post("/project", upload.single("image"), async (request, response) => {
 //delete från admin sidan så att jag kan ta bort projekt från databasen via frontend
 app.post("/adminDeleteProjects", async (request, response) => {
   try {
-    const { project_id } = request.body;
+    const { project_id }: RequestBody = request.body;
     // const {rows} =
     await client.query("DELETE FROM projects WHERE project_id =$1", [
       project_id,
@@ -380,7 +384,7 @@ app.post("/adminDeleteProjects", async (request, response) => {
 //delete från admin sidan så att jag kan ta bort produkter från databasen via frontend
 app.post("/adminDeleteItems", async (request, response) => {
   try {
-    const { item_id } = request.body;
+    const { item_id }: RequestBody = request.body;
 
     if (!item_id) {
       throw new Error("ogiltlig item_id");
