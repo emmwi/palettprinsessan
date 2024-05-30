@@ -40,12 +40,7 @@ export default function AddKnitwear() {
       <AdminContainer>
         <AdminCard>
           <h2>Lägg till Stickat Plagg</h2>
-          <AdminForm
-            action="http://localhost:8080/knitwear"
-            method="post"
-            encType="multipart/form-data"
-            onSubmit={handleSumbit}
-          >
+          <AdminForm encType="multipart/form-data" onSubmit={handleSumbit}>
             <label>Namn</label>
             <TextInput
               type="input"

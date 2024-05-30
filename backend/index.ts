@@ -1,14 +1,11 @@
 import cors from "cors";
 import * as dotenv from "dotenv";
 import { Client } from "pg";
-import express, { response } from "express";
-// import { request } from "http";
+import express from "express";
 import path from "path";
 import multer from "multer";
-// import { fileURLToPath } from "url";
 import { v4 as uuidv4 } from "uuid";
-import { request } from "http";
-// import { constants } from "buffer";
+// import { request } from "http";
 __dirname = path.dirname(__filename);
 
 const app = express();

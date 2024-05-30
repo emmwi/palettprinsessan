@@ -1,7 +1,7 @@
 import Header from "../components/Header/Header";
 import Footer from "../components/Footer/Footer";
 import Navbar from "../components/Navbar/Navbar";
-import "./globals.css"; // import NavbarAdmin from "../components/Navbar/navbar-admin/NavBarAdmin";
+import "./globals.css";
 import { BurgerMenuProvider } from "../components/Navbar/BurgerMenu/BurgerMenuContext";
 import { CartProvider } from "../components/shopping-cart/CartContext";
 
@@ -22,7 +22,6 @@ export default function RootLayout({
           <BurgerMenuProvider>
             <Header />
             <Navbar />
-            {/* <NavbarAdmin /> */}
           </BurgerMenuProvider>
           <main>{children}</main>
           <Footer />

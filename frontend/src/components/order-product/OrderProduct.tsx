@@ -1,5 +1,5 @@
 "use client";
-import { Key, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useCartContext } from "../shopping-cart/CartContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -12,6 +12,7 @@ import {
   OderButton,
   Price,
 } from "../general-css/GeneralStyles";
+import { Item } from "../../types/types";
 
 export default function OrderProduct() {
   const { cartItems, addToCart, doesCartExists, outOfStock } = useCartContext();
@@ -37,14 +38,7 @@ export default function OrderProduct() {
     fetchItems();
   }, []);
 
-  const handleClick = (clickedItem: {
-    item_id: Key | undefined | null;
-    name: string;
-    description: string;
-    image: string;
-    price: number;
-    type: string;
-  }) => {
+  const handleClick = (clickedItem: Item) => {
     addToCart({
       item_id: clickedItem.item_id as number,
       image: clickedItem.image,
@@ -63,38 +57,29 @@ export default function OrderProduct() {
         <h1>Stickade plagg</h1>
         <ToastContainer />
         {items !== null &&
-          items.map(
-            (item: {
-              item_id: Key | undefined | null;
-              name: string;
-              description: string;
-              image: string;
-              price: number;
-              type: string;
-            }) => (
-              <Card key={item.item_id}>
-                <h2>{item.name}</h2>
-                <Img
-                  src={`http://localhost:8080${item.image}`}
-                  alt="bild på projektet"
+          items.map((item: Item) => (
+            <Card key={item.item_id}>
+              <h2>{item.name}</h2>
+              <Img
+                src={`http://localhost:8080${item.image}`}
+                alt="bild på projektet"
+              />
+              <Info>{item.description},</Info>
+              <Price>{item.price} kr</Price>
+              {/* avvaktiverar knappen och ändrar den till 'slut i lager' om det item man klickar på har samma id som något av de items som finns i cartitems eller outofstock */}
+              {![...cartItems, ...outOfStock].find(
+                (cartItem) => cartItem.item_id === item.item_id
+              ) ? (
+                <OderButton
+                  type="button"
+                  value="Handla"
+                  onClick={() => handleClick(item)}
                 />
-                <Info>{item.description},</Info>
-                <Price>{item.price} kr</Price>
-                {/* avvaktiverar knappen och ändrar den till 'slut i lager' om det item man klickar på har samma id som något av de items som finns i cartitems eller outofstock */}
-                {![...cartItems, ...outOfStock].find(
-                  (cartItem) => cartItem.item_id === item.item_id
-                ) ? (
-                  <OderButton
-                    type="button"
-                    value="Handla"
-                    onClick={() => handleClick(item)}
-                  />
-                ) : (
-                  <OderButton type="button" value="Slut i lager" disabled />
-                )}
-              </Card>
-            )
-          )}
+              ) : (
+                <OderButton type="button" value="Slut i lager" disabled />
+              )}
+            </Card>
+          ))}
       </Container>
     </>
   );

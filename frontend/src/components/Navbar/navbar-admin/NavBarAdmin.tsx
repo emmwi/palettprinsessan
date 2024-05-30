@@ -35,7 +35,6 @@ export default function NavbarAdmin() {
       <Nav>
         <Burger />
         {/* skickar props till styled component för navbar och specifikt navbarul */}
-
         <NavUlist $isopen={isopen}>
           <NavList>
             <Link href="/admin/addproducts" onClick={toggle}>

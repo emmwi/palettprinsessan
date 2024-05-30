@@ -22,9 +22,7 @@ export default function ShoppingCart() {
             <Card key={index}>
               <h3>{item.name}</h3>
               <Img src={`http://localhost:8080${item.image}`} alt={item.name} />
-
               <p>{item.price} kr</p>
-
               <button
                 onClick={() => {
                   removeFromCart(item);
@@ -40,5 +38,3 @@ export default function ShoppingCart() {
     </>
   );
 }
-
-// https://dev.to/anne46/cart-functionality-in-react-with-context-api-2k2f

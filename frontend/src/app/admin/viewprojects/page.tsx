@@ -1,26 +1,5 @@
-// import ProjectsAdmin from "../../../components/start-page/Projects";
-// export default function viewProject() {
-//   return (
-//     <>
-//       <ProjectsAdmin />
-//     </>
-//   );
-// }
-
-// import PatternContent from "../../../components/Patterns-page/patterns";
-// import OrderProduct from "../../../components/order-product/OrderProduct";
-// export default function ViewProducts() {
-//   return (
-//     <>
-//       <h1>Översikt Produkter</h1>
-//       <PatternContent />
-//       <OrderProduct />
-//     </>
-//   );
-// }
-
 "use client";
-import { Key, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import {
   Card,
@@ -28,16 +7,10 @@ import {
   Container,
   Info,
   OderButton,
-  Price,
 } from "../../../components/general-css/GeneralStyles";
+import { Project } from "../../../types/types";
 
 export default function viewProject() {
-  type Project = {
-    project_id: number;
-    name: string;
-    description: string;
-    image: string;
-  };
   const [projects, setProjects] = useState<Project[]>([]);
   const [message, setMessage] = useState("");
   useEffect(() => {
@@ -51,12 +24,8 @@ export default function viewProject() {
         setProjects(result);
       });
   }
-  const handleClick = (clickedItem: {
-    project_id: number;
-    name: string;
-    description: string;
-    image: string;
-  }) => {
+
+  const handleClick = (clickedItem: Project) => {
     axios
       .post("http://localhost:8080/adminDeleteProjects", {
         project_id: clickedItem.project_id,
@@ -76,30 +45,23 @@ export default function viewProject() {
         <h1>Översikt Projekt</h1>
         {message.length > 0 ? <p>{message}</p> : null}
         {projects !== null &&
-          projects.map(
-            (project: {
-              project_id: number;
-              name: string;
-              description: string;
-              image: string;
-            }) => (
-              <Card key={project.project_id}>
-                <h2>Namn: {project.name}</h2>
-                <Img
-                  src={`http://localhost:8080${project.image}`}
-                  alt="bild på projektet"
-                />
-                <Info>Beskrivning: {project.description}</Info>
-                <OderButton
-                  type="button"
-                  value="Ta bort projekt"
-                  onClick={() => {
-                    handleClick(project);
-                  }}
-                />
-              </Card>
-            )
-          )}
+          projects.map((project: Project) => (
+            <Card key={project.project_id}>
+              <h2>Namn: {project.name}</h2>
+              <Img
+                src={`http://localhost:8080${project.image}`}
+                alt="bild på projektet"
+              />
+              <Info>Beskrivning: {project.description}</Info>
+              <OderButton
+                type="button"
+                value="Ta bort projekt"
+                onClick={() => {
+                  handleClick(project);
+                }}
+              />
+            </Card>
+          ))}
       </Container>
     </>
   );

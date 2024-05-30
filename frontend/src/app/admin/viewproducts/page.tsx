@@ -1,18 +1,6 @@
-// import PatternContent from "../../../components/Patterns-page/patterns";
-// import OrderProduct from "../../../components/order-product/OrderProduct";
-// export default function ViewProducts() {
-//   return (
-//     <>
-//       <h1>Översikt Produkter</h1>
-//       <PatternContent />
-//       <OrderProduct />
-//     </>
-//   );
-// }
-
 "use client";
 import axios from "axios";
-import { Key, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   Img,
@@ -21,7 +9,7 @@ import {
   OderButton,
   Price,
 } from "../../../components/general-css/GeneralStyles";
-
+import { Item } from "../../../types/types";
 export default function ViewProducts() {
   const [items, setItem] = useState([]);
   const [message, setMessage] = useState("");
@@ -39,14 +27,7 @@ export default function ViewProducts() {
     fetchItems();
   }, [message]);
 
-  const handleClick = (clickedItem: {
-    item_id: Key | undefined | null;
-    name: string;
-    description: string;
-    image: string;
-    price: number;
-    type: string;
-  }) => {
+  const handleClick = (clickedItem: Item) => {
     axios
       .post("http://localhost:8080/adminDeleteItems", {
         item_id: clickedItem.item_id,
@@ -66,42 +47,32 @@ export default function ViewProducts() {
         <h1>Översikt Produkter</h1>
         {message.length > 0 ? <p>{message}</p> : null}
         {items !== null &&
-          items.map(
-            (item: {
-              item_id: Key | undefined | null;
-              name: string;
-              description: string;
-              image: string;
-              price: number;
-              type: string;
-              pdf: string;
-            }) => (
-              <Card key={item.item_id}>
-                <h2>Namn: {item.name}</h2>
-                <Img
-                  src={`http://localhost:8080${item.image}`}
-                  alt="bild på projektet"
-                />
-                <Info>Sort: {item.type}</Info>
-                <Info>Beskrivning: {item.description}</Info>
-                <Price>Pris: {item.price} kr</Price>
-                {/* <embed
+          items.map((item: Item) => (
+            <Card key={item.item_id}>
+              <h2>Namn: {item.name}</h2>
+              <Img
+                src={`http://localhost:8080${item.image}`}
+                alt="bild på projektet"
+              />
+              <Info>Sort: {item.type}</Info>
+              <Info>Beskrivning: {item.description}</Info>
+              <Price>Pris: {item.price} kr</Price>
+              {/* <embed
                   src={`http://localhost:8080${item.pdf}`}
                   type="application/pdf"
                   width="100%"
                   height="600px"
                 /> */}
 
-                <OderButton
-                  type="button"
-                  value="Ta bort produkt"
-                  onClick={() => {
-                    handleClick(item);
-                  }}
-                />
-              </Card>
-            )
-          )}
+              <OderButton
+                type="button"
+                value="Ta bort produkt"
+                onClick={() => {
+                  handleClick(item);
+                }}
+              />
+            </Card>
+          ))}
       </Container>
     </>
   );

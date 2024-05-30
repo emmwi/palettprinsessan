@@ -1,5 +1,4 @@
 import styled from "@emotion/styled";
-import { exportTraceState } from "next/dist/trace";
 
 export const HeaderSyle = styled.header`
   /* background: linear-gradient(

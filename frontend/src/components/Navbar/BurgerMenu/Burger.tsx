@@ -7,7 +7,6 @@ export default function Burger() {
 
   console.log("Props in BurgerMenu:", { isopen, toggle });
   return (
-    // <BurgerMenu isopen={isopen.toString()} onClick={toggle}>
     <BurgerMenu $isopen={isopen} onClick={toggle}>
       <div />
       <div />

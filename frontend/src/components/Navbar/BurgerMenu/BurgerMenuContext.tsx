@@ -32,10 +32,7 @@ export const BurgerMenuProvider: React.FC<BurgerMenuProviderProps> = ({
     setIsOpen(!isOpen);
   }
   return (
-    <BurgerMenuContext.Provider
-      // value={{ isopen: isOpen.toString() === "true", toggle }}
-      value={{ isopen: isOpen, toggle }}
-    >
+    <BurgerMenuContext.Provider value={{ isopen: isOpen, toggle }}>
       {children}
     </BurgerMenuContext.Provider>
   );

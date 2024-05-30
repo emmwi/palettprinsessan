@@ -41,12 +41,7 @@ export default function AddProject() {
       <AdminContainer>
         <AdminCard>
           <h2>Lägg till projekt</h2>
-          <AdminForm
-            // action="http://localhost:8080/project"
-            // method="post"
-            encType="multipart/form-data"
-            onSubmit={handleSumbit}
-          >
+          <AdminForm encType="multipart/form-data" onSubmit={handleSumbit}>
             <label>Namn</label>
             <TextInput
               type="input"

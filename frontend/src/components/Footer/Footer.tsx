@@ -20,7 +20,6 @@ export default function Footer() {
             />
           </ContactLink>
           <ContactLink href="argus_92@hotmail.com">
-            {" "}
             <LinkIcons src="envelope-solid.svg" alt="link to email" />
           </ContactLink>
         </ContentFooterContainer>

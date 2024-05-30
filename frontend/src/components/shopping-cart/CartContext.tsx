@@ -1,3 +1,6 @@
+// Källa: använt en del kod men även uppdaterat och lagt till/ändrat frö att får det att fungera med min backend
+// https://dev.to/anne46/cart-functionality-in-react-with-context-api-2k2f
+
 "use client";
 import {
   createContext,
@@ -8,33 +11,8 @@ import {
 } from "react";
 import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
-
 import { toast } from "react-toastify";
-
-interface CartItem {
-  image: string;
-  name: string;
-  price: number;
-  quantity: number;
-  item_id: number;
-  type: string;
-}
-
-interface CartSessions {
-  cart_id: number;
-  session_id: string;
-}
-
-interface CartContextProps {
-  cartItems: CartItem[];
-  setCartItems: (items: CartItem[]) => void;
-  addToCart: (item: CartItem) => void;
-  removeFromCart: (item: CartItem) => void;
-  getCartTotal: () => number;
-  doesCartExists: () => void;
-  getCartItems: () => void;
-  outOfStock: CartItem[];
-}
+import { CartItem, CartContextProps } from "../../types/types";
 
 const CartContext = createContext<CartContextProps | undefined>(undefined);
 

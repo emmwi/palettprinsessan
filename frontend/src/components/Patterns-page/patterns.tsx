@@ -1,7 +1,7 @@
 "use client";
 import { useCartContext } from "../shopping-cart/CartContext";
 import axios from "axios";
-import { Key, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -12,6 +12,7 @@ import {
   OderButton,
   Price,
 } from "../general-css/GeneralStyles";
+import { Item } from "../../types/types";
 
 export default function PatternContent() {
   const { addToCart, doesCartExists } = useCartContext();
@@ -38,14 +39,7 @@ export default function PatternContent() {
     fetchItems();
   }, []);
 
-  const handleClick = (clickedItem: {
-    item_id: Key | undefined | null;
-    name: string;
-    description: string;
-    image: string;
-    price: number;
-    type: string;
-  }) => {
+  const handleClick = (clickedItem: Item) => {
     addToCart({
       item_id: clickedItem.item_id as number,
       image: clickedItem.image,
@@ -63,37 +57,26 @@ export default function PatternContent() {
         <h1>Mönster</h1>
         <ToastContainer />
         {items !== null &&
-          items.map(
-            (item: {
-              item_id: Key | undefined | null;
-              name: string;
-              description: string;
-              image: string;
-              price: number;
-              type: string;
-            }) => (
-              <Card key={item.item_id}>
-                <h2>{item.name}</h2>
-                <Img
-                  src={`http://localhost:8080${item.image}`}
-                  alt="bild på projektet"
-                />
-                <Info>{item.description},</Info>
-                <Price>{item.price} kr</Price>
+          items.map((item: Item) => (
+            <Card key={item.item_id}>
+              <h2>{item.name}</h2>
+              <Img
+                src={`http://localhost:8080${item.image}`}
+                alt="bild på projektet"
+              />
+              <Info>{item.description},</Info>
+              <Price>{item.price} kr</Price>
 
-                <OderButton
-                  type="button"
-                  value="Handla"
-                  onClick={() => {
-                    handleClick(item);
-                  }}
-                />
-              </Card>
-            )
-          )}
+              <OderButton
+                type="button"
+                value="Handla"
+                onClick={() => {
+                  handleClick(item);
+                }}
+              />
+            </Card>
+          ))}
       </Container>
     </>
   );
 }
-
-// https://stackoverflow.com/questions/30887225/use-special-characters-%C3%A5%C3%A4%C3%B6-in-the-postgresql-shell

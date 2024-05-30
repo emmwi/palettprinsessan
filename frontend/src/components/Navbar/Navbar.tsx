@@ -1,5 +1,4 @@
 "use client";
-
 import NavbarAdmin from "./navbar-admin/NavBarAdmin";
 import NavbarClient from "./navbar-client/NavbarClient";
 import { usePathname, useRouter } from "next/navigation";
@@ -11,7 +10,6 @@ export default function Navbar() {
 
   if (pathname === "/admin") {
     return null;
-    // return <Login />;
   }
   // Kolla om adressparametern är "/admin"
   const isAdminRoute = pathname.startsWith("/admin");
