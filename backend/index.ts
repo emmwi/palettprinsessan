@@ -7,6 +7,7 @@ import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
 // import { request } from "http";
 __dirname = path.dirname(__filename);
+import { Project, Item, Fields } from "./backendTypes/types";
 
 const app = express();
 
@@ -47,19 +48,12 @@ const uploadPattern = multer({
 //hämta projekten
 app.get("/projects", async (_request, response) => {
   const { rows } = await client.query("SELECT * FROM projects ");
-  const projectData = rows.map(
-    (project: {
-      project_id: number;
-      name: string;
-      description: string;
-      image: string;
-    }) => ({
-      project_id: project.project_id,
-      name: project.name,
-      description: project.description,
-      image: `/uploads/projects/${project.image}`,
-    })
-  );
+  const projectData = rows.map((project: Project) => ({
+    project_id: project.project_id,
+    name: project.name,
+    description: project.description,
+    image: `/uploads/projects/${project.image}`,
+  }));
   return response.send(projectData);
 });
 
@@ -68,28 +62,18 @@ app.get("/getItems", async (_request, response) => {
   try {
     const { rows } = await client.query("SELECT * FROM items");
 
-    const itemData = rows.map(
-      (items: {
-        item_id: number;
-        name: string;
-        description: string;
-        image: string;
-        price: Number;
-        type: string;
-        pdf: string;
-      }) => ({
-        item_id: items.item_id,
-        name: items.name,
-        description: items.description,
-        image:
-          items.type === "knitwear"
-            ? `/uploads/knitwear/${items.image}`
-            : `/uploads/patternsPDF/${items.image}`,
-        price: items.price,
-        type: items.type,
-        pdf: `/uploads/patternsPDF/${items.pdf}`,
-      })
-    );
+    const itemData = rows.map((items: Item) => ({
+      item_id: items.item_id,
+      name: items.name,
+      description: items.description,
+      image:
+        items.type === "knitwear"
+          ? `/uploads/knitwear/${items.image}`
+          : `/uploads/patternsPDF/${items.image}`,
+      price: items.price,
+      type: items.type,
+      pdf: `/uploads/patternsPDF/${items.pdf}`,
+    }));
     response.status(200).send(itemData);
   } catch (error) {
     console.log(error, "gick inte att hämta items");
@@ -99,7 +83,7 @@ app.get("/getItems", async (_request, response) => {
 //lägger till ett sessionID i cart
 app.post("/createSessionAndCart", async (request, response) => {
   const { sessionId } = request.body;
-  console.log(sessionId);
+
   await client.query("INSERT INTO carts (session_id) VALUES ($1) RETURNING *", [
     sessionId,
   ]);
@@ -109,11 +93,6 @@ app.post("/createSessionAndCart", async (request, response) => {
 //lägga in saker i cart
 app.post("/addToCart", async (request, response) => {
   const { sessionId, quantity, item_id, type } = request.body;
-  console.log("Request body:", request.body);
-  console.log("sessionId:", sessionId);
-  console.log("quantity:", quantity);
-  console.log("item_id:", item_id);
-  console.log("item type", type);
   try {
     const { rows } = await client.query(
       "select * from carts where session_id = $1",
@@ -122,8 +101,6 @@ app.post("/addToCart", async (request, response) => {
 
     if (rows.length !== 0) {
       const cart_id = rows[0].cart_id;
-      console.log("itemid", item_id);
-      console.log("cartid", cart_id);
 
       //om det finns några varor med type knitwear som man försökt lägga till så kollar den i allt som finns i cart_items och items om den varan redan ligger i en annan cart.
       if (type === "knitwear") {
@@ -133,11 +110,7 @@ app.post("/addToCart", async (request, response) => {
           [item_id]
         );
         //om varan ligger i en annan cart så får man ett meddelande om att varan är slut i lager.
-        console.log(
-          "börja med knitwerarconsole",
-          knitWearItem.rows[0],
-          "vad gör knitwearitem"
-        );
+
         if (knitWearItem.rows.length > 0) {
           return response.status(418).send({
             message: "varan är slut i lager.",
@@ -150,9 +123,6 @@ app.post("/addToCart", async (request, response) => {
         [cart_id, item_id]
       );
 
-      console.log("existing item in add to cart", existingItem.rows.length);
-      console.log(rows[0].type);
-      console.log(type);
       if (existingItem.rows.length === 0 || type === "pattern") {
         const result = await client.query(
           "INSERT INTO cart_items ( cart_id, item_id, quantity) VALUES ($1, $2, $3) RETURNING *",
@@ -201,7 +171,6 @@ app.post("/deleteItemFromCart", async (request, response) => {
         .send("Kundvagnen är tom eller sessionId finns inte");
     }
     const itemExists = rows.find((item) => item.item_id === item_id);
-    console.log("finns det jag vill ta bort?", itemExists.item_id);
 
     if (!itemExists) {
       return response.status(404).send("Artikeln finns inte i kundvagnen");
@@ -249,32 +218,21 @@ app.get("/getCartItems", async (request, response) => {
       "SELECT * FROM items INNER JOIN cart_items ON items.item_id = cart_items.item_id WHERE cart_items.cart_id = $1;",
       [cartId]
     );
+
     //mappar ut den itemData
-    const itemData = rows.map(
-      (items: {
-        item_id: number;
-        name: string;
-        description: string;
-        image: string;
-        pdf: string | undefined | null;
-        price: Number;
-        type: string;
-      }) => ({
-        item_id: items.item_id,
-        name: items.name,
-        description: items.description,
-        image:
-          items.type === "knitwear"
-            ? `/uploads/knitwear/${items.image}`
-            : `/uploads/patternsPDF/${items.image}`,
-        pdf:
-          items.type === "pattern"
-            ? `/uploads/patternsPDF/${items.image}`
-            : null,
-        price: items.price,
-        type: items.type,
-      })
-    );
+    const itemData = rows.map((items: Item) => ({
+      item_id: items.item_id,
+      name: items.name,
+      description: items.description,
+      image:
+        items.type === "knitwear"
+          ? `/uploads/knitwear/${items.image}`
+          : `/uploads/patternsPDF/${items.image}`,
+      pdf:
+        items.type === "pattern" ? `/uploads/patternsPDF/${items.image}` : null,
+      price: items.price,
+      type: items.type,
+    }));
 
     return response.status(200).send(itemData);
   } catch (error) {
@@ -326,20 +284,6 @@ app.post("/logout/", async (_request, response) => {
   }
 });
 
-interface Fields {
-  image: FieldObject[];
-  pdf: FieldObject[];
-}
-interface FieldObject {
-  fieldname: string;
-  originalname: string;
-  encoding: string;
-  mimetype: string;
-  destination: string;
-  filename: string;
-  path: string;
-  size: number;
-}
 //lögga till stickade plagg
 app.post(
   "/knitwear",
@@ -374,8 +318,6 @@ app.post(
       const name = request.body.name;
       const description = request.body.description;
       const price = request.body.price;
-
-      console.log(request.files);
       if (request.files !== undefined) {
         //lägga in samma sak i items-tabellen också så att de kan nås i cart
         await client.query(
@@ -405,7 +347,6 @@ app.post("/project", upload.single("image"), async (request, response) => {
     const name = request.body.name;
     const description = request.body.description;
     if (request.file !== undefined) {
-      console.log(request.file);
       response.status(201).send("projekt uppladdat");
       await client.query(
         "INSERT INTO projects (name, image, description) VALUES ($1, $2, $3) RETURNING *",
@@ -440,7 +381,7 @@ app.post("/adminDeleteProjects", async (request, response) => {
 app.post("/adminDeleteItems", async (request, response) => {
   try {
     const { item_id } = request.body;
-    console.log(item_id, "itemid i admindelteitems");
+
     if (!item_id) {
       throw new Error("ogiltlig item_id");
     }
