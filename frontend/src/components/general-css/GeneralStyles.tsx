@@ -11,6 +11,23 @@ export const Card = styled.div`
   padding: 1em;
   border: 2px solid #345b5652;
   border-radius: 1em;
+  max-width: 20em;
+
+  @media screen and (min-width: 990px) {
+    flex: 11 20em;
+    margin: 1em;
+  }
+`;
+export const CardsContianer = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  @media screen and (min-width: 990px) {
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1em;
+  }
 `;
 
 export const Container = styled.div`
@@ -18,7 +35,7 @@ export const Container = styled.div`
   text-align: center;
 
   @media screen and (min-width: 990px) {
-    max-width: 30em;
+    /* max-width: ; */
   }
 `;
 
