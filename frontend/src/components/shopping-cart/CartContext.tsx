@@ -60,9 +60,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   async function getCartItems() {
     try {
       //kollar om det finns en cart eller inte
-      const sessionId = doesCartExists();
+      // const sessionId = doesCartExists();
+      const sessionId = localStorage.getItem("sessionId");
       if (!sessionId) {
-        throw new Error("session Id  finns inte");
+        console.warn("No sessionId provided, skipping fetch");
+
+        return;
       }
       //skicka en get till backend och skicka med sessionId som query med params
       const response = await axios.get("http://localhost:8080/getCartItems", {
@@ -72,7 +75,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       console.log(response.data, "data från get cartitems");
       setCartItems(response.data);
     } catch (error) {
-      console.error("Error vid hämtning av varukorgen:", error);
+      console.log("Error vid hämtning av varukorgen:", error);
     }
   }
 

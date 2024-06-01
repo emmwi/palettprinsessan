@@ -3,6 +3,7 @@ import { RiDeleteBin5Line } from "react-icons/ri";
 import { useCartContext } from "./CartContext";
 import { Card, Img, Container } from "../general-css/GeneralStyles";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ShoppingCart() {
   const { cartItems, removeFromCart, getCartTotal, getCartItems } =
@@ -12,7 +13,7 @@ export default function ShoppingCart() {
     getCartItems();
     console.log("här har vi kört get cart items");
   }, []);
-
+  const router = useRouter();
   return (
     <>
       <div>
@@ -34,6 +35,13 @@ export default function ShoppingCart() {
           ))}
         </Container>
         <p>Summa: {getCartTotal()} kr</p>
+        <input
+          type="button"
+          value="Betala"
+          onClick={() => {
+            router.push("/payment");
+          }}
+        />
       </div>
     </>
   );

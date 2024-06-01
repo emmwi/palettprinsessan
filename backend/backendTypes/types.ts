@@ -32,6 +32,7 @@ interface FieldObject {
 
 type uuid = string;
 export interface RequestBody {
+  cartItems: Item;
   sessionId: uuid;
   quantity: number;
   item_id: number;

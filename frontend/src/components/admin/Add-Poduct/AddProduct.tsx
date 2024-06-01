@@ -12,6 +12,7 @@ import { FormEvent, useState } from "react";
 export default function AddKnitwear() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
 
   //funktion för att förhindra att man skickas till backend med submit
   const handleSumbit = async (e: FormEvent<HTMLFormElement>) => {
@@ -29,6 +30,7 @@ export default function AddKnitwear() {
 
       setName("");
       setDescription("");
+      setPrice("");
       alert("Knitwear uppladdad");
     } catch (error) {
       console.log("error i AddKnitwear", error);
@@ -58,7 +60,12 @@ export default function AddKnitwear() {
               onChange={(e) => setDescription(e.target.value)}
             />
             <label>Pris:</label>
-            <TextInput type="input" name="price" />
+            <TextInput
+              type="input"
+              name="price"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+            />
             <AddButton type="submit" value="Lägg till projekt " />
           </AdminForm>
         </AdminCard>

@@ -1,7 +1,7 @@
 import cors from "cors";
 import * as dotenv from "dotenv";
 import { Client } from "pg";
-import express from "express";
+import express, { response } from "express";
 import path from "path";
 import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
@@ -13,7 +13,13 @@ import {
   CartItem,
   Carts,
 } from "./backendTypes/types";
-import { UUID } from "crypto";
+dotenv.config();
+//connection med databasen
+const client = new Client({
+  connectionString: process.env.PGURI,
+});
+client.connect();
+
 __dirname = path.dirname(__filename);
 
 const app = express();
@@ -34,12 +40,6 @@ app.use(
   "/uploads/knitwear",
   express.static(path.join(__dirname, "uploads", "knitwear"))
 );
-dotenv.config();
-//connection med databasen
-const client = new Client({
-  connectionString: process.env.PGURI,
-});
-client.connect();
 
 //visar vilken mapp man ska lägga uppladdning av bilder/pdf
 const upload = multer({ dest: path.join(__dirname, "uploads", "projects") });
@@ -247,6 +247,45 @@ app.get("/getCartItems", async (request, response) => {
   }
 });
 
+//ta bort grejer från  cart_items, ta bort den cart som har betalt, ta bort sessionId ta bort knitwear man handlat.
+
+app.post("/paymentSuccessful", async (request, response) => {
+  const { sessionId, cartItems }: RequestBody = request.body;
+  console.log(cartItems);
+  console.log(cartItems.type);
+  const typedCartItems: Item[] = cartItems as unknown as Item[];
+  //hämtar först cart_id som är reggat på aktuellt sessionId
+  const cart = await client.query(
+    "SELECT cart_id FROM carts WHERE session_id=$1",
+    [sessionId]
+  );
+  if (cart.rows.length === 0) {
+    return response.status(404).send("cart not found");
+  }
+  const cart_id = cart.rows[0].cart_id;
+
+  const itemInCart = await client.query(
+    "SELECT item_id FROM cart_items WHERE cart_id=$1",
+    [cart_id]
+  );
+  const items_id = itemInCart.rows.map((row) => row.item_id);
+
+  const knitwearItems = typedCartItems.filter(
+    (cartItem: { type: string }) => cartItem.type === "knitwear"
+  );
+  const knitwearItemIds = knitwearItems.map(
+    (cartItem: { item_id: number }) => cartItem.item_id
+  );
+
+  await client.query("DELETE FROM cart_items WHERE cart_id=$1", [cart_id]);
+  await client.query("DELETE FROM carts WHERE session_id =$1 ", [sessionId]);
+  for (const item_id of items_id) {
+    if (knitwearItemIds.includes(item_id)) {
+      await client.query("DELETE FROM items WHERE item_id=$1", [item_id]);
+    }
+  }
+  response.status(200).send("Payment processed and cart cleared");
+});
 //post för att kunna göra ett inlogg och skapa ett token för admin --- det ska bara finnas en admin i denna applikationen
 app.post("/login", async (request, response) => {
   const { adminName, password }: RequestBody = request.body;

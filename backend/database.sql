@@ -42,3 +42,12 @@ CREATE TABLE cart_items (
   FOREIGN KEY (cart_id) REFERENCES carts(cart_id),
   FOREIGN KEY (item_id) REFERENCES items(item_id)
 );
+
+tabell för project
+
+CREATE TABLE pojects (
+  project_id SERIAL PRIMARY KEY,
+ name TEXT UNIQUE NOT NULL,
+  image TEXT NOT NULL,
+  description TEXT NOT NULL,
+);
