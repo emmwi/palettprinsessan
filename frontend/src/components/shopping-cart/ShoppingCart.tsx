@@ -4,6 +4,7 @@ import { useCartContext } from "./CartContext";
 import { Card, Img, Container } from "../general-css/GeneralStyles";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { ToastContainer } from "react-toastify";
 
 export default function ShoppingCart() {
   const { cartItems, removeFromCart, getCartTotal, getCartItems } =
@@ -17,6 +18,7 @@ export default function ShoppingCart() {
   return (
     <>
       <div>
+        <ToastContainer />
         <Container>
           {cartItems.length === 0 && <p> Din kundkorg är tom</p>}
           {cartItems.map((item, index) => (
@@ -37,7 +39,7 @@ export default function ShoppingCart() {
         <p>Summa: {getCartTotal()} kr</p>
         <input
           type="button"
-          value="Betala"
+          value="Gå till Kassa"
           onClick={() => {
             router.push("/payment");
           }}

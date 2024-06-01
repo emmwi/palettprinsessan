@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { CartItem, CartContextProps } from "../../types/types";
+import { useRouter } from "next/navigation";
 
 const CartContext = createContext<CartContextProps | undefined>(undefined);
 
@@ -27,17 +28,20 @@ export const useCartContext = () => {
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [outOfStock, setOutOfStock] = useState<CartItem[]>([]);
+  const [cartItemNavabar, setCartItemNavbar] = useState(false);
 
   //hämtar carten direkt när man renderar sidan
   useEffect(() => {
     getCartItems();
   }, []);
 
-  //klar 20240525
+  const router = useRouter();
+
+  //funktion för att kolla om det finns en varukorg
   const doesCartExists = () => {
     //  sätter sessionId till sessionId som finns i local storage
     let sessionId = localStorage.getItem("sessionId");
-    console.log(sessionId);
+
     //om det inte finns ett sessionId i localstorage, sätts ett sessionId och sättes till localstorage
     if (!sessionId) {
       sessionId = uuidv4();
@@ -56,15 +60,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     return sessionId;
     //returnerar sessionId
   };
+
   //hämtar det som finns i shoppingcart, klart 20240525
   async function getCartItems() {
     try {
-      //kollar om det finns en cart eller inte
-      // const sessionId = doesCartExists();
+      //kollar om det finns en cart eller inte, om det finns ett sessionid i localstorage hämtas det
       const sessionId = localStorage.getItem("sessionId");
       if (!sessionId) {
-        console.warn("No sessionId provided, skipping fetch");
-
+        //cartItems sätts till tom om det inte finns ett sessionId.
+        setCartItems([]);
+        console.warn(
+          "det finns ingen varukorg, avbryter funktionen getCartItems"
+        );
         return;
       }
       //skicka en get till backend och skicka med sessionId som query med params
@@ -164,6 +171,24 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         console.log("deleteItemFromCart response", response.data);
         //uppdaterar setCartItem efter att det tagits bort från databasen.
         setCartItems(itemToRemove);
+        toast(`${item.name} är borttagen från varukorgen!`, {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "light",
+          style: {
+            backgroundColor: "",
+            color: "#ef0d0d",
+            border: "1px solid #f60b0b",
+            borderRadius: "8px",
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            padding: "16px",
+            fontSize: "16px",
+          },
+        });
       })
       .catch((error) => {
         console.error("Error removing item from cart:", error);
@@ -179,6 +204,32 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }, 0);
   };
 
+  //fick lägga funktionen här för att navbaren skulla ha tillgång till
+  const handlePaymentClick = () => {
+    const sessionId = localStorage.getItem("sessionId");
+
+    const cartItemTypes = cartItems.map((cartItem) => cartItem.type);
+    console.log("Alla cartitemtyper:", cartItemTypes);
+    axios
+      .post("http://localhost:8080/paymentSuccessful", {
+        sessionId,
+        cartItems,
+      })
+      .then((response) => {
+        console.log("deleteItemFromCart response", response.data);
+        //ta brot sessionId från local storage
+        localStorage.removeItem("sessionId");
+        //hämtar varukorgen igen
+        getCartTotal();
+        //variabel för att ändra så att man kan lyssna på att denna ändras innan useeffect kör getcartitems i navbarclient.
+        setCartItemNavbar(!cartItemNavabar);
+        router.push("/paymentSuccess");
+      })
+      .catch((error) => {
+        console.error("det gick inte att betala i frontend:", error);
+      });
+  };
+
   return (
     <CartContext.Provider
       value={{
@@ -190,6 +241,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         doesCartExists,
         getCartItems,
         outOfStock,
+        handlePaymentClick,
+        cartItemNavabar,
       }}
     >
       {children}

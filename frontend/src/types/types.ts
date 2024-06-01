@@ -34,4 +34,6 @@ export interface CartContextProps {
   doesCartExists: () => void;
   getCartItems: () => void;
   outOfStock: CartItem[];
+  handlePaymentClick: () => void;
+  cartItemNavabar: boolean;
 }

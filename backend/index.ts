@@ -1,7 +1,7 @@
 import cors from "cors";
 import * as dotenv from "dotenv";
 import { Client } from "pg";
-import express, { response } from "express";
+import express from "express";
 import path from "path";
 import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
@@ -88,7 +88,7 @@ app.get("/getItems", async (_request, response) => {
 //lägger till ett sessionID i cart
 app.post("/createSessionAndCart", async (request, response) => {
   const { sessionId }: RequestBody = request.body;
-
+  //lägger till en cart med sessionId som skapas i localstorage och skickas till backend med post
   await client.query<Carts>(
     "INSERT INTO carts (session_id) VALUES ($1) RETURNING *",
     [sessionId]
@@ -107,7 +107,6 @@ app.post("/addToCart", async (request, response) => {
 
     if (rows.length !== 0) {
       const cart_id = rows[0].cart_id;
-
       //om det finns några varor med type knitwear som man försökt lägga till så kollar den i allt som finns i cart_items och items om den varan redan ligger i en annan cart.
       if (type === "knitwear") {
         //jointable som hämtar all information från cart_items, kollar i items och i cart_items om på item_id matchar- att samma item_id finns i båda tabellerna. Om item_id finns i båda tabllerna OCH item är av typen "knitwear" så hämtas dessa items och sparas i knitWearItem. -- kollar om cart_item innehåller
@@ -116,7 +115,6 @@ app.post("/addToCart", async (request, response) => {
           [item_id]
         );
         //om varan ligger i en annan cart så får man ett meddelande om att varan är slut i lager.
-
         if (knitWearItem.rows.length > 0) {
           return response.status(418).send({
             message: "varan är slut i lager.",
@@ -124,11 +122,12 @@ app.post("/addToCart", async (request, response) => {
           });
         }
       }
+      //hämtar och kollar om det item man klickat på finns i varukorgen
       const existingItem = await client.query<CartItem>(
         "SELECT * FROM cart_items WHERE cart_id = $1 AND item_id = $2",
         [cart_id, item_id]
       );
-
+      //om det man klickat på inte finns i anvöndarens varukorg eller om den har type "pattern" så läggs den till i cart_items
       if (existingItem.rows.length === 0 || type === "pattern") {
         const result = await client.query<CartItem>(
           "INSERT INTO cart_items ( cart_id, item_id, quantity) VALUES ($1, $2, $3) RETURNING *",
@@ -145,16 +144,17 @@ app.post("/addToCart", async (request, response) => {
       }
     }
   } catch (error) {
-    console.error("Error adding item to cart:", error);
+    console.error("Det gick inte att lägga till vara i varukorgen:", error);
     response.status(500).send("Internal Server Error");
   }
 });
 
 //deleta om man tar bort saker från cart
+//ev gör om denna då den har lite mycket kod som kanske inte är helt nödvändig.
 app.post("/deleteItemFromCart", async (request, response) => {
   const { item_id, sessionId }: RequestBody = request.body;
 
-  // Steg 1: Kontrollera om både item_id och sessionId finns
+  //Kontrollera om både item_id och sessionId finns
   if (!item_id || !sessionId) {
     return response.status(400).send("item_id och sessionId krävs");
   }
@@ -164,29 +164,35 @@ app.post("/deleteItemFromCart", async (request, response) => {
       "SELECT cart_id FROM carts WHERE session_id = $1",
       [sessionId]
     );
-    //hämtar rätt cart_id basserat på sessionId
+    //sätter cart_id basserat på sessionId och tidigare hämtade result
     const cart_id = result.rows[0].cart_id;
 
+    //hämtar det item man klickat på och kollar först att det finns ett sådant item om inte får man att kundvagnen inte innehåller det man klickat på.
+
+    //ev kan detta tas bort
     const { rows } = await client.query<CartItem>(
       "SELECT item_id FROM cart_items WHERE item_id = $1",
       [item_id]
     );
     if (rows.length === 0) {
-      return response
-        .status(404)
-        .send("Kundvagnen är tom eller sessionId finns inte");
+      return response.status(404).send("Kundvagnen innehåller inte denna vara");
     }
-    const itemExists = rows.find((item) => item.item_id === item_id);
+    //kollar igenom det man klickat på för att se att det item_id man hämtat från cart_item stämmer överens med det man klickat på
 
+    //ev kan detta tas bort
+    const itemExists = rows.find((item) => item.item_id === item_id);
+    //om det inte stämmer överens får man ett till felmeddelande att det inte finns i varukorgen
+    //ev kan detta tas bort
     if (!itemExists) {
       return response.status(404).send("Artikeln finns inte i kundvagnen");
     }
 
-    //tar bort cart_item som passar item_id och cart_id
+    //om inga felmeddelande kommer så tar man bort cart_item som passar item_id och cart_id
     await client.query<CartItem>(
       "DELETE FROM cart_items WHERE item_id = $1 AND cart_id = $2",
       [item_id, cart_id]
     );
+
     response.status(200).send("Artikeln har tagits bort från kundvagnen");
   } catch (error) {
     console.error("Internt serverfel:", error);
@@ -204,20 +210,22 @@ app.get("/getCartItems", async (request, response) => {
     if (!activeCartSessionId) {
       return response.status(400).send({ error: "Session ID måste finnas" });
     }
-    //hämtar id som finns på cart items
+    //hämtar id som finns på aktiv cart
     const cartResult = await client.query<Carts>(
       "SELECT cart_id FROM carts WHERE session_id = $1",
       [activeCartSessionId]
     );
+    //om cartResult är en tom arrayså finns det ingen cart för sesssionsid som ät satt
     if (cartResult.rows.length === 0) {
       return response
         .status(404)
         .send({ error: "det finns ingen cart för det satta sessionId" });
     }
-
-    const cartId: number = cartResult.rows[0].cart_id; // Hämtar cart_id från den första raden, om den finns
+    // Hämtar cart_id från den första raden, om den finns
+    const cartId: number = cartResult.rows[0].cart_id;
+    //kollar igen om det inte finns ett cart-id- (ev överflödig)
     if (!cartId) {
-      throw new Error("Cart ID not found");
+      throw new Error("Cart ID kunde inte hittas");
     }
     //hämtar alla cart_items som finns basserat på det cart_idet man har som hämtas via sessionId som skickas via query.
     const { rows } = await client.query(
@@ -247,12 +255,9 @@ app.get("/getCartItems", async (request, response) => {
   }
 });
 
-//ta bort grejer från  cart_items, ta bort den cart som har betalt, ta bort sessionId ta bort knitwear man handlat.
-
+//ta bort varor som är köpta och av typen knitwear, tar bort cart_items och tar bort cart. -- senare även lägga till info om beställning i en orders tabell( finns inte än)
 app.post("/paymentSuccessful", async (request, response) => {
   const { sessionId, cartItems }: RequestBody = request.body;
-  console.log(cartItems);
-  console.log(cartItems.type);
   const typedCartItems: Item[] = cartItems as unknown as Item[];
   //hämtar först cart_id som är reggat på aktuellt sessionId
   const cart = await client.query(
@@ -260,36 +265,34 @@ app.post("/paymentSuccessful", async (request, response) => {
     [sessionId]
   );
   if (cart.rows.length === 0) {
-    return response.status(404).send("cart not found");
+    return response.status(404).send("varukorg finns inte ");
   }
+  //för att få tag i cart_id från den session_id man har fått från frontend
   const cart_id = cart.rows[0].cart_id;
 
-  const itemInCart = await client.query(
-    "SELECT item_id FROM cart_items WHERE cart_id=$1",
-    [cart_id]
-  );
-  const items_id = itemInCart.rows.map((row) => row.item_id);
-
+  //kollar filtrerar cartitems och spara de som har type "knitwear"
   const knitwearItems = typedCartItems.filter(
     (cartItem: { type: string }) => cartItem.type === "knitwear"
   );
+  //tar up item_id av de knitwear som finns i cartitems
   const knitwearItemIds = knitwearItems.map(
     (cartItem: { item_id: number }) => cartItem.item_id
   );
-
+  //raderar de som finns i cart_item som är kopplat till den cart man chekcar ut
   await client.query("DELETE FROM cart_items WHERE cart_id=$1", [cart_id]);
+  //raderar själva varukorgen basserat på det sessionId som använts
   await client.query("DELETE FROM carts WHERE session_id =$1 ", [sessionId]);
-  for (const item_id of items_id) {
-    if (knitwearItemIds.includes(item_id)) {
-      await client.query("DELETE FROM items WHERE item_id=$1", [item_id]);
-    }
+  //loopar igenom och deletar de item som har type "knitwear" från items-tabellen
+  for (const item_id of knitwearItemIds) {
+    await client.query("DELETE FROM items WHERE item_id=$1", [item_id]);
   }
   response.status(200).send("Payment processed and cart cleared");
 });
+
 //post för att kunna göra ett inlogg och skapa ett token för admin --- det ska bara finnas en admin i denna applikationen
 app.post("/login", async (request, response) => {
   const { adminName, password }: RequestBody = request.body;
-
+  //hämtar alla admin (finns bara en)
   const { rows } = await client.query("SELECT * FROM admin  WHERE name = $1 ", [
     adminName,
   ]);
@@ -406,7 +409,10 @@ app.post("/project", upload.single("image"), async (request, response) => {
 app.post("/adminDeleteProjects", async (request, response) => {
   try {
     const { project_id }: RequestBody = request.body;
-    // const {rows} =
+    if (!project_id) {
+      throw new Error("ogiltlig project_id");
+    }
+    //tar bort det item man klickat på
     await client.query("DELETE FROM projects WHERE project_id =$1", [
       project_id,
     ]);
@@ -428,6 +434,7 @@ app.post("/adminDeleteItems", async (request, response) => {
     if (!item_id) {
       throw new Error("ogiltlig item_id");
     }
+    //tar bort det item man klickat på
     await client.query("DELETE FROM items WHERE item_id =$1", [item_id]);
     response
       .status(200)

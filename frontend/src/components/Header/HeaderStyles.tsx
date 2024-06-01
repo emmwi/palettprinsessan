@@ -1,12 +1,6 @@
 import styled from "@emotion/styled";
 
 export const HeaderSyle = styled.header`
-  /* background: linear-gradient(
-    180deg,
-    #a6d6d5e1 41%,
-    #a6d6d5b3 54%,
-    #faebd7c2 76%
-  ); */
   background: linear-gradient(
     180deg,
     rgba(166, 214, 213, 1) 0%,

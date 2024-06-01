@@ -17,16 +17,16 @@ import { Item } from "../../types/types";
 
 export default function OrderProduct() {
   const { cartItems, addToCart, doesCartExists, outOfStock } = useCartContext();
-  console.log("cartcontext hittas");
+
   const [items, setItem] = useState([]);
 
   async function fetchItems() {
     try {
       const response = await axios.get("http://localhost:8080/getItems", {});
       if (response.data) {
-        console.log(response.data, "vad får jag");
+        //går igenom och filterar responsen så att den bara visar de med typen knitwear på items
         const filteredItems = response.data.filter(
-          (fItem: { type: any }) => fItem.type === "knitwear"
+          (fItem: { type: string }) => fItem.type === "knitwear"
         );
 
         setItem(filteredItems);

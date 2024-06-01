@@ -12,12 +12,19 @@ import {
 import { useCartContext } from "../../shopping-cart/CartContext";
 import Burger from "../BurgerMenu/Burger";
 import { useBurgerMenuContext } from "../BurgerMenu/BurgerMenuContext";
+import { useEffect, useState } from "react";
 
 export default function NavbarClient() {
   //Tar emot värde för isOpen från usecontext för brugermenu
   const { isopen, toggle } = useBurgerMenuContext();
   //Tar emot värde för cartItems från usecontext för cart
-  const { cartItems } = useCartContext();
+  const { cartItems, getCartItems, cartItemNavabar } = useCartContext();
+
+  /*kör getCartItems om cartietmnavbar ändras, den går från true/false varje gång handpayment körs i context. - gör såhär då det inte funkade att lyssna på att cartitems ändrade sig (evig loop)*/
+  useEffect(() => {
+    getCartItems();
+  }, [cartItemNavabar]);
+
   return (
     <>
       <CartContainer>
@@ -25,6 +32,7 @@ export default function NavbarClient() {
           {cartItems.length > 0 ? (
             <CartSpan>{cartItems.length}</CartSpan>
           ) : null}
+
           <CartIcons src="cart-shopping-solid.svg" alt="link to shoppingcart" />
         </Link>
       </CartContainer>

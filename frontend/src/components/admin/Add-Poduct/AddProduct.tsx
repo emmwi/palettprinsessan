@@ -31,6 +31,7 @@ export default function AddKnitwear() {
       setName("");
       setDescription("");
       setPrice("");
+      //ovan sätter inputfält/textfält till noll när man tryckt på submit, inte filerna dock
       alert("Knitwear uppladdad");
     } catch (error) {
       console.log("error i AddKnitwear", error);

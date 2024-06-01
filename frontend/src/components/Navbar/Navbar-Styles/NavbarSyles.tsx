@@ -1,6 +1,5 @@
 import styled from "@emotion/styled";
 import "@fontsource/italianno";
-import { StyledEngineProvider } from "@mui/material";
 
 interface NavUlistProps {
   $isopen: boolean;
@@ -24,7 +23,6 @@ export const CartIcons = styled.img`
 `;
 export const CartSpan = styled.span`
   font-size: 1.5em;
-  /* text-decoration: none; */
   text-decoration: none !important;
 `;
 export const NavUlist = styled.ul<NavUlistProps>`
