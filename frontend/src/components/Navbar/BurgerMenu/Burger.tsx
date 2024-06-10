@@ -14,3 +14,5 @@ export default function Burger() {
     </BurgerMenu>
   );
 }
+
+//källa: https://www.youtube.com/watch?v=GGkBwpxV7AI&t=1255s

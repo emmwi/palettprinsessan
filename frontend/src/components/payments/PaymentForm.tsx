@@ -1,6 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useCartContext } from "../shopping-cart/CartContext";
+
 export default function PaymentForm() {
   const { cartItems, handlePaymentClick, getCartTotal, getCartItems } =
     useCartContext();

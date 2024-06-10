@@ -15,6 +15,7 @@ export default function ShoppingCart() {
     console.log("här har vi kört get cart items");
   }, []);
   const router = useRouter();
+  
   return (
     <>
       <div>

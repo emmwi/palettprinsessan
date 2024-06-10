@@ -1,6 +1,10 @@
 
 ----https://stackoverflow.com/questions/30887225/use-special-characters-%C3%A5%C3%A4%C3%B6-in-the-postgresql-shell
 
+Tabeller som finns i postgresql databas
+
+
+tabell för admin
 CREATE TABLE admin (
     id SERIAL PRIMARY KEY,
     name TEXT UNIQUE NOT NULL,
@@ -9,20 +13,26 @@ CREATE TABLE admin (
 );
 * VARCHAR tillåter både nummer och text
 
+---finns babra en admin
+INSERT INTO admin (name, password) VALUES ('test', "secret");
+
+
+---uppdateras automatiskt
+tabell för inloggning admin och token
 CREATE TABLE adminToken (
     admin_id INTEGER,
     token VARCHAR PRIMARY KEY,
     FOREIGN KEY (admin_id) REFERENCES admin(id)
 );
 
-Tabell för varukorgen
+Tabell för varukorgen- uppdateras automatiskt när man klickar på handla-knapp
   CREATE TABLE carts (
       cart_id SERIAL PRIMARY KEY,
       session_id VARCHAR,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 
-tabell för items - produkter
+tabell för items - produkter ---går att uppdartea om man går till localhost300/admin och loggar in
 CREATE TABLE items (
   item_id SERIAL PRIMARY KEY,
   name TEXT UNIQUE NOT NULL,
@@ -33,7 +43,8 @@ CREATE TABLE items (
   type TEXT NOT NULL
 );
 
-tabell för vilka items (produkter) som finns i varukorgen
+
+tabell för vilka items (produkter) som finns i varukorgen ---uppdateras automatiskt
 CREATE TABLE cart_items (
   cart_item_id SERIAL PRIMARY KEY,
   cart_id INT NOT NULL,
@@ -43,11 +54,10 @@ CREATE TABLE cart_items (
   FOREIGN KEY (item_id) REFERENCES items(item_id)
 );
 
-tabell för project
-
-CREATE TABLE pojects (
+tabell för project ---går att uppdartea om man går till localhost300/admin och loggar in
+CREATE TABLE projects (
   project_id SERIAL PRIMARY KEY,
  name TEXT UNIQUE NOT NULL,
   image TEXT NOT NULL,
-  description TEXT NOT NULL,
+  description TEXT NOT NULL
 );

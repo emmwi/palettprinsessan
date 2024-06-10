@@ -6,6 +6,7 @@ export interface Project {
 }
 //interface för mönster och knitwear
 export interface Item {
+  filter(arg0: (cartItem: { type: string; }) => boolean): unknown;
   item_id: number;
   name: string;
   description: string;
