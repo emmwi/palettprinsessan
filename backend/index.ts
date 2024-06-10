@@ -448,5 +448,6 @@ app.post("/adminDeleteItems", async (request, response) => {
 });
 
 app.listen(port, () => {
-  console.log("Webbtjänsten kan nu ta emot anrop.  http://localhost:${port}/");
+  // console.log("Webbtjänsten kan nu ta emot anrop.  http://localhost:${port}/");
+  console.log(`Redo på http://localhost:${port}/`);
 });
