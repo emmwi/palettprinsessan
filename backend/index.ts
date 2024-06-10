@@ -22,7 +22,8 @@ client.connect();
 
 __dirname = path.dirname(__filename);
 
-const app = express();
+const app = express(),
+  port = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
@@ -446,6 +447,6 @@ app.post("/adminDeleteItems", async (request, response) => {
   }
 });
 
-app.listen(8080, () => {
-  console.log("Webbtjänsten kan nu ta emot anrop.  http://localhost:8080/");
+app.listen(port, () => {
+  console.log("Webbtjänsten kan nu ta emot anrop.  http://localhost:${port}/");
 });
