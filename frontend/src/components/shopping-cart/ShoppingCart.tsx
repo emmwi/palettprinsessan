@@ -27,7 +27,7 @@ export default function ShoppingCart() {
               <h3>{item.name}</h3>
               <Img
                 // src={`http://localhost:8080${item.image}`}
-                src={`https://palettprinsessan.onrender.com/${item.image}`}
+                src={`https://palettprinsessan.onrender.com${item.image}`}
                 alt={item.name}
               />
               <p>{item.price} kr</p>

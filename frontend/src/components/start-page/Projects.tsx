@@ -32,7 +32,7 @@ export default function projects() {
                 <h2>{project.name}</h2>
                 <Img
                   // src={`http://localhost:8080${project.image}`}
-                  src={`https://palettprinsessan.onrender.com/${project.image}`}
+                  src={`https://palettprinsessan.onrender.com${project.image}`}
                   alt="bild på projektet"
                 />
                 <Info>{project.description}</Info>

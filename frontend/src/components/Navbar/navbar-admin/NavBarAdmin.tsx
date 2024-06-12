@@ -20,7 +20,9 @@ export default function NavbarAdmin() {
 
   async function deleteToken() {
     try {
-      const response = await axios.post("http://localhost:8080/logout");
+      const response = await axios.post(
+        "https://palettprinsessan.onrender.com/logout"
+      );
       if (response) {
         router.push("/admin");
         console.log("utloggad");
