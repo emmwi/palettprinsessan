@@ -22,7 +22,11 @@ export default function OrderProduct() {
 
   async function fetchItems() {
     try {
-      const response = await axios.get("http://localhost:8080/getItems", {});
+      // const response = await axios.get("http://localhost:8080/getItems", {});
+      const response = await axios.get(
+        "https://palettprinsessan.onrender.com/getItems",
+        {}
+      );
       if (response.data) {
         //går igenom och filterar responsen så att den bara visar de med typen knitwear på items
         const filteredItems = response.data.filter(
@@ -63,7 +67,8 @@ export default function OrderProduct() {
               <Card key={item.item_id}>
                 <h2>{item.name}</h2>
                 <Img
-                  src={`http://localhost:8080${item.image}`}
+                  // src={`http://localhost:8080${item.image}`}
+                  src={`https://palettprinsessan.onrender.com${item.image}`}
                   alt="bild på projektet"
                 />
                 <Info>{item.description}</Info>

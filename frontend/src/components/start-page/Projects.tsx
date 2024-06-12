@@ -13,7 +13,7 @@ export default function projects() {
   const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/projects")
+    fetch("https://palettprinsessan.onrender.com/projects")
       .then((response) => response.json())
       .then((result) => {
         setProjects(result);
@@ -31,7 +31,8 @@ export default function projects() {
               <Card key={project.project_id}>
                 <h2>{project.name}</h2>
                 <Img
-                  src={`http://localhost:8080${project.image}`}
+                  // src={`http://localhost:8080${project.image}`}
+                  src={`https://palettprinsessan.onrender.com/${project.image}`}
                   alt="bild på projektet"
                 />
                 <Info>{project.description}</Info>

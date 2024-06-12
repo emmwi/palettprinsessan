@@ -47,7 +47,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       sessionId = uuidv4();
       localStorage.setItem("sessionId", sessionId);
 
-      fetch("http://localhost:8080/createSessionAndCart", {
+      // fetch("http://localhost:8080/createSessionAndCart", {
+      //   method: "POST",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({ sessionId }),
+      // }).catch((error) => {
+      //   console.error("Error starting session and creating cart:", error);
+      // });
+      fetch("https://palettprinsessan.onrender.com/createSessionAndCart", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -75,9 +84,15 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
       //skicka en get till backend och skicka med sessionId som query med params
-      const response = await axios.get("http://localhost:8080/getCartItems", {
-        params: { sessionId },
-      });
+      // const response = await axios.get("http://localhost:8080/getCartItems", {
+      //   params: { sessionId },
+      // });
+      const response = await axios.get(
+        "https://palettprinsessan.onrender.com/getCartItems",
+        {
+          params: { sessionId },
+        }
+      );
       //sätter cartItems till den datan som finns i cart_items tabellen
       console.log(response.data, "data från get cartitems");
       setCartItems(response.data);
@@ -97,8 +112,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     //om item inte finns i cart läggs den till i newCartItem
     if (!isItemInCart || item.type === "pattern") {
       //kör en post med newCartItem till backend och därefter uppdateras det på frontend med setCartItems
+      //lokatl http://localhost:8080/addToCart"
       axios
-        .post("http://localhost:8080/addToCart", {
+        .post("https://palettprinsessan.onrender.com/addToCart", {
           ...item,
           quantity: 1,
           sessionId,
@@ -163,7 +179,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     //sätter sessionId för att skicka med till backend.
     const sessionId = localStorage.getItem("sessionId");
     axios
-      .post("http://localhost:8080/deleteItemFromCart", {
+      .post("https://palettprinsessan.onrender.com/deleteItemFromCart", {
         item_id: item.item_id,
         sessionId: sessionId,
       })
@@ -211,7 +227,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     const cartItemTypes = cartItems.map((cartItem) => cartItem.type);
     console.log("Alla cartitemtyper:", cartItemTypes);
     axios
-      .post("http://localhost:8080/paymentSuccessful", {
+      .post("https://palettprinsessan.onrender.com/paymentSuccessful", {
         sessionId,
         cartItems,
       })

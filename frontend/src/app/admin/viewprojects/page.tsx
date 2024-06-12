@@ -19,7 +19,13 @@ export default function viewProject() {
   }, []);
 
   function fetchProjects() {
-    fetch("http://localhost:8080/projects")
+    // fetch("http://localhost:8080/projects")
+
+    //   .then((response) => response.json())
+    //   .then((result) => {
+    //     setProjects(result);
+    //   });
+    fetch("https://palettprinsessan.onrender.com/projects")
       .then((response) => response.json())
       .then((result) => {
         setProjects(result);
@@ -27,8 +33,19 @@ export default function viewProject() {
   }
 
   const handleClick = (clickedItem: Project) => {
+    // axios
+    //   .post("http://localhost:8080/adminDeleteProjects", {
+    //     project_id: clickedItem.project_id,
+    //   })
+    //   .then((response) => {
+    //     setMessage(response.data.message);
+    //     fetchProjects();
+    //   })
+    //   .catch((error) => {
+    //     console.log("det gick inte att ta bort projektet", error);
+    //   });
     axios
-      .post("http://localhost:8080/adminDeleteProjects", {
+      .post("https://palettprinsessan.onrender.com/adminDeleteProjects", {
         project_id: clickedItem.project_id,
       })
       .then((response) => {
@@ -51,7 +68,8 @@ export default function viewProject() {
               <Card key={project.project_id}>
                 <h2>Namn: {project.name}</h2>
                 <Img
-                  src={`http://localhost:8080${project.image}`}
+                  // src={`http://localhost:8080${project.image}`}
+                  src={`https://palettprinsessan.onrender.com${project.image}`}
                   alt="bild på projektet"
                 />
                 <Info>Beskrivning: {project.description}</Info>

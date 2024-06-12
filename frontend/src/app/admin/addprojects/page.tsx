@@ -19,10 +19,17 @@ export default function AddProject() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     try {
-      const response = await fetch("http://localhost:8080/project", {
-        method: "POST",
-        body: formData,
-      });
+      // const response = await fetch("http://localhost:8080/project", {
+      //   method: "POST",
+      //   body: formData,
+      // });
+      const response = await fetch(
+        "https://palettprinsessan.onrender.com/project",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error("AddProject response not ok ");

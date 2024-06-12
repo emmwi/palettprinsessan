@@ -19,10 +19,17 @@ export default function AddKnitwear() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     try {
-      const response = await fetch("http://localhost:8080/knitwear", {
-        method: "POST",
-        body: formData,
-      });
+      // const response = await fetch("http://localhost:8080/knitwear", {
+      //   method: "POST",
+      //   body: formData,
+      // });
+      const response = await fetch(
+        "https://palettprinsessan.onrender.com/knitwear",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error("AddKnitwear response not ok ");

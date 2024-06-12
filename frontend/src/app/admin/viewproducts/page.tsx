@@ -17,7 +17,11 @@ export default function ViewProducts() {
   const [message, setMessage] = useState("");
   async function fetchItems() {
     try {
-      const response = await axios.get("http://localhost:8080/getItems", {});
+      // const response = await axios.get("http://localhost:8080/getItems", {});
+      const response = await axios.get(
+        "https://palettprinsessan.onrender.com/getItems",
+        {}
+      );
       if (response.data) {
         setItem(response.data);
       }
@@ -30,8 +34,19 @@ export default function ViewProducts() {
   }, [message]);
 
   const handleClick = (clickedItem: Item) => {
+    // axios
+    //   .post("http://localhost:8080/adminDeleteItems", {
+    //     item_id: clickedItem.item_id,
+    //   })
+    //   .then((response) => {
+    //     setMessage(response.data.message);
+    //     fetchItems();
+    //   })
+    //   .catch((error) => {
+    //     console.log("det gick inte att ta bort projektet", error);
+    //   });
     axios
-      .post("http://localhost:8080/adminDeleteItems", {
+      .post("https://palettprinsessan.onrender.com/adminDeleteItems", {
         item_id: clickedItem.item_id,
       })
       .then((response) => {
@@ -54,7 +69,8 @@ export default function ViewProducts() {
               <Card key={item.item_id}>
                 <h2>Namn: {item.name}</h2>
                 <Img
-                  src={`http://localhost:8080${item.image}`}
+                  // src={`http://localhost:8080${item.image}`}
+                  src={`https://palettprinsessan.onrender.com${item.image}`}
                   alt="bild på projektet"
                 />
                 <Info>Sort: {item.type}</Info>

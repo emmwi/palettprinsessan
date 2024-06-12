@@ -16,10 +16,17 @@ export default function LoginAdmin() {
 
   async function fetchAdmin(adminName: string, password: string) {
     try {
-      const response = await axios.post("http://localhost:8080/login", {
-        adminName: adminName,
-        password: password,
-      });
+      // const response = await axios.post("http://localhost:8080/login", {
+      //   adminName: adminName,
+      //   password: password,
+      // });
+      const response = await axios.post(
+        "https://palettprinsessan.onrender.com/login",
+        {
+          adminName: adminName,
+          password: password,
+        }
+      );
       if (response) {
         router.push("/admin/addprojects");
       } else {

@@ -18,10 +18,17 @@ export default function AddPattern() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     try {
-      const response = await fetch("http://localhost:8080/patterns", {
-        method: "POST",
-        body: formData,
-      });
+      // const response = await fetch("http://localhost:8080/patterns", {
+      //   method: "POST",
+      //   body: formData,
+      // });
+      const response = await fetch(
+        "https://palettprinsessan.onrender.com/patterns",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!response.ok) {
         throw new Error("AddPattern response not ok ");

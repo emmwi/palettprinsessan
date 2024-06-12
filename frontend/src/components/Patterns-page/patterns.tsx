@@ -23,7 +23,11 @@ export default function PatternContent() {
 
   async function fetchItems() {
     try {
-      const response = await axios.get("http://localhost:8080/getItems", {});
+      // const response = await axios.get("http://localhost:8080/getItems", {});
+      const response = await axios.get(
+        "https://palettprinsessan.onrender.com/getItems",
+        {}
+      );
       if (response.data) {
         console.log(response.data, "vad får jag");
         const filteredItems = response.data.filter(
@@ -63,7 +67,8 @@ export default function PatternContent() {
               <Card key={item.item_id}>
                 <h2>{item.name}</h2>
                 <Img
-                  src={`http://localhost:8080${item.image}`}
+                  // src={`http://localhost:8080${item.image}`}
+                  src={`https://palettprinsessan.onrender.com${item.image}`}
                   alt="bild på projektet"
                 />
                 <Info>{item.description},</Info>
